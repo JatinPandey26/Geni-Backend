@@ -1,0 +1,17 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16
+    container_name: geni-postgres
+    environment:
+      POSTGRES_DB: geni
+      POSTGRES_USER: geni
+      POSTGRES_PASSWORD: geni
+      PGTZ: Asia/Kolkata
+    ports:
+      - "5432:5432"
+    volumes:
+      - geni_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  geni_postgres_data:
