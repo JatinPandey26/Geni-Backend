@@ -2,7 +2,7 @@ package com.geni.backend.Connector.validation;
 
 import com.geni.backend.Connector.ConnectorDefinition;
 import com.geni.backend.Connector.ConnectorRegistry;
-import com.geni.backend.Connector.exception.CredentialValidationException;
+import com.geni.backend.common.exception.CredentialValidationException;
 import com.geni.backend.common.CredentialField;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

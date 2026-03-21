@@ -1,7 +1,7 @@
 package com.geni.backend.common;
 
-import com.geni.backend.Connector.exception.CredentialValidationException;
-import com.geni.backend.Connector.exception.UnknownConnectorException;
+import com.geni.backend.common.exception.CredentialValidationException;
+import com.geni.backend.common.exception.UnknownConnectorException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -5,7 +5,9 @@ import lombok.Getter;
 
 @Getter
 public enum ConnectorType {
-    GITHUB("GITHUB","github");
+    GITHUB("GITHUB","github"),
+    GMAIL("GMAIL","gmail");
+    // what about external source ???
 
     String type;
     String name;

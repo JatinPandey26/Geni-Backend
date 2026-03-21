@@ -1,6 +1,6 @@
 package com.geni.backend.Connector;
 
-import com.geni.backend.Connector.exception.UnknownConnectorException;
+import com.geni.backend.common.exception.UnknownConnectorException;
 import com.geni.backend.Connector.handler.ConnectorHandler;
 import org.springframework.stereotype.Component;
 
