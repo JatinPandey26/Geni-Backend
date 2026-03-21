@@ -1,9 +1,8 @@
 package com.geni.backend.common;
 
-import com.geni.backend.Connector.exception.ExternalApiException;
+import com.geni.backend.common.exception.ExternalApiException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
-import tools.jackson.databind.ObjectMapper;
 
 // BaseApiClient.java
 public abstract class BaseApiClient {
