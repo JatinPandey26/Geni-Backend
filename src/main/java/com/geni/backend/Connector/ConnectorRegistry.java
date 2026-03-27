@@ -16,11 +16,9 @@ public class ConnectorRegistry {
 
     Map<ConnectorType,ConnectorDefinition> connectorDefinitionsMap;
     Map<ConnectorType,ConnectorHandler> connectorHandlersMap;
-    ConnectorDefinitionValidator connectorDefinitionValidator;
 
 
     public ConnectorRegistry(List<ConnectorDefinition> connectorDefinitions, List<ConnectorHandler> connectorHandlers) {
-        connectorDefinitionValidator.validateDefinition(connectorDefinitions);
         connectorDefinitionsMap = connectorDefinitions.stream().collect(Collectors.toUnmodifiableMap(ConnectorDefinition::getType, Function.identity()));
         connectorHandlersMap = connectorHandlers.stream().collect(Collectors.toUnmodifiableMap(ConnectorHandler::connectorType,Function.identity()));
         validate();
