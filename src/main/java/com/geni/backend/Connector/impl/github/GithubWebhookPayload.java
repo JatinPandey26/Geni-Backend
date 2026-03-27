@@ -26,7 +26,11 @@ public class GithubWebhookPayload {
     @JsonProperty("sender")
     private Actor sender;
 
+    @JsonProperty("repository")
+    private RepositoryRef repository;           // present on repo/issue events
 
+    @JsonProperty("issue")
+    private Issue issue;                       // present on issue events
 
     // ── Nested DTOs ───────────────────────────────────────────────────
 

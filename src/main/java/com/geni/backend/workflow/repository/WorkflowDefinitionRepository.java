@@ -1,6 +1,7 @@
 package com.geni.backend.workflow.repository;
 
 import com.geni.backend.workflow.core.WorkflowDefinition;
+import com.geni.backend.workflow.core.WorkflowTriggerView;
 import com.geni.backend.workflow.enums.WorkflowStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +25,8 @@ public interface WorkflowDefinitionRepository
     Optional<WorkflowDefinition> findByIdAndUserId(UUID id, String userId);
 
     // Poller: all active workflows waiting for a given trigger
-    List<WorkflowDefinition> findByTriggerDefinitionIdAndStatus(
-            String triggerDefinitionId, WorkflowStatus status);
+    List<WorkflowDefinition> findByTriggerTypeAndStatus(
+            String triggerType, WorkflowStatus status);
 
     // Guard before deleting an integration:
     // "does any active workflow still use this integration as its trigger?"
@@ -38,4 +39,14 @@ public interface WorkflowDefinitionRepository
     boolean existsActiveWorkflowUsingTriggerIntegration(
             @Param("userId") String userId,
             @Param("integrationId") String integrationId);
+
+    @Query("""
+    SELECT 
+      w.id as workflowId,
+      w.name as workflowName,
+      w.triggerType as triggerType,
+      w.triggerConfig as triggerConfig
+    FROM WorkflowDefinition w
+    """)
+    List<WorkflowTriggerView> findByTriggerType(String triggerType);
 }

@@ -27,7 +27,7 @@ public class WorkflowDefinition {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    //TODO : change to userId of type Long after authentication is implemented as foreign key to users table
+    //TODO : change to userId of triggerType Long after authentication is implemented as foreign key to users table
     @Column(name = "user_id")
     private String userId;
 
@@ -41,8 +41,8 @@ public class WorkflowDefinition {
     private WorkflowStatus status = WorkflowStatus.DRAFT;
 
     // ── Trigger (embedded columns) ─────────────────────────────
-    @Column(name = "trigger_definition_id", nullable = false)
-    private String triggerDefinitionId;
+    @Column(name = "triggerType", nullable = false)
+    private String triggerType;
 
     @Column(name = "trigger_integration_id")
     private Long triggerIntegrationId;

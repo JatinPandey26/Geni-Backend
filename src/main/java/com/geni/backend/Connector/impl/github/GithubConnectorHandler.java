@@ -31,7 +31,7 @@ public class GithubConnectorHandler implements ConnectorHandler {
     private static final String INSTALLATION_ID_KEY = "installationId";
 
     /**
-     * Returns the connector type this handler manages.
+     * Returns the connector triggerType this handler manages.
      *
      * @return ConnectorType.GITHUB
      */
@@ -108,9 +108,9 @@ public class GithubConnectorHandler implements ConnectorHandler {
             throw new IllegalArgumentException("Webhook response body cannot be null or empty");
         }
 
-        // Extract event type
+        // Extract event triggerType
         String event = callbackParams.get(GITHUB_EVENT_HEADER);
-        log.debug("GitHub webhook event type: {}", event);
+        log.debug("GitHub webhook event triggerType: {}", event);
 
         if (event == null) {
             log.warn("GitHub webhook missing {} header", GITHUB_EVENT_HEADER);

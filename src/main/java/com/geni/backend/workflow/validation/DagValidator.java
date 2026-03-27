@@ -204,7 +204,7 @@ public class DagValidator {
 
         } else {
             throw new WorkflowValidationException(
-                    "Step '" + stepName + "': unknown condition type " + condition.getClass().getSimpleName());
+                    "Step '" + stepName + "': unknown condition triggerType " + condition.getClass().getSimpleName());
         }
     }
 

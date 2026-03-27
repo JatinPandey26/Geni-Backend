@@ -36,14 +36,14 @@ public class ActionDefinitionRegistry {
 
     public ActionDefinition findOrThrow(String type) {
         return find(type).orElseThrow(() ->
-                new IllegalArgumentException("Unknown ActionDefinition type: " + type));
+                new IllegalArgumentException("Unknown ActionDefinition triggerType: " + type));
     }
 
     public Collection<ActionDefinition> all() {
         return registry.values();
     }
 
-    /** All actions available for a given connector type. */
+    /** All actions available for a given connector triggerType. */
     public Collection<ActionDefinition> forConnector(
             com.geni.backend.Connector.ConnectorType connectorType) {
         return registry.values().stream()

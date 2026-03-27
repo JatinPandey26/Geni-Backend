@@ -8,8 +8,10 @@ import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
 import com.geni.backend.Connector.impl.github.service.GithubService;
 import com.geni.backend.Connector.impl.github.specification.GithubIntegrationSpecification;
 import com.geni.backend.integration.Service.IntegrationService;
-import com.geni.backend.trigger.core.TriggerEventType;
+import com.geni.backend.trigger.core.TriggerEvent;
+import com.geni.backend.trigger.core.TriggerType;
 import com.geni.backend.trigger.impl.github.triggers.GithubTriggerResolver;
+import com.geni.backend.workflow.service.WorkflowExecutorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ public class GithubServiceImpl implements GithubService {
     private final ObjectMapper objectMapper;
     private final IntegrationService integrationService;
     private final GithubTriggerResolver githubTriggerResolver;
+    private final WorkflowExecutorService workflowExecutorService;
 
     @Override
     public void handleEvent(Map<String,String> headers, String rawBody) {
@@ -52,13 +55,18 @@ public class GithubServiceImpl implements GithubService {
             return;
         }
 
-        Optional<TriggerEventType> triggerEvent = githubTriggerResolver.resolve(githubWebhookEvent, payload ,deliveryId);
+        Optional<TriggerType> triggerType = githubTriggerResolver.resolve(githubWebhookEvent, payload ,deliveryId);
 
-        if(triggerEvent.isEmpty()){
-            throw new WebhookParseException("Unsupported GitHub event type: " + event);
+        if(triggerType.isEmpty()){
+            throw new WebhookParseException("Unsupported GitHub event triggerType: " + event);
         }
 
-        // trigger logic starts here
+        TriggerEvent<GithubWebhookPayload> triggerEvent = TriggerEvent.<GithubWebhookPayload>builder()
+                .triggerType(triggerType.get())
+                .payload(payload)
+                .build();
+
+        workflowExecutorService.executeWorkflow(triggerEvent);
     }
 
     @Override

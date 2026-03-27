@@ -13,7 +13,7 @@ public class FieldSchema {
     String type;         // "string", "number", "boolean", "object"
     boolean required;
     String description;
-    Map<String, FieldSchema> properties;  // non-null when type = "object"
+    Map<String, FieldSchema> properties;  // non-null when triggerType = "object"
 
     public static FieldSchema string(String description) {
         return FieldSchema.builder().type("string").required(true)
