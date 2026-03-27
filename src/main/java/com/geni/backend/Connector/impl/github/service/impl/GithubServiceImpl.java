@@ -8,11 +8,14 @@ import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
 import com.geni.backend.Connector.impl.github.service.GithubService;
 import com.geni.backend.Connector.impl.github.specification.GithubIntegrationSpecification;
 import com.geni.backend.integration.Service.IntegrationService;
+import com.geni.backend.trigger.core.TriggerEventType;
+import com.geni.backend.trigger.impl.github.triggers.GithubTriggerResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class GithubServiceImpl implements GithubService {
     private final GithubAppConfig githubAppConfig;
     private final ObjectMapper objectMapper;
     private final IntegrationService integrationService;
+    private final GithubTriggerResolver githubTriggerResolver;
 
     @Override
     public void handleEvent(Map<String,String> headers, String rawBody) {
@@ -46,6 +50,12 @@ public class GithubServiceImpl implements GithubService {
 
             integrationService.createIntegration(ConnectorType.GITHUB.getType(),headers,rawBody);
             return;
+        }
+
+        Optional<TriggerEventType> triggerEvent = githubTriggerResolver.resolve(githubWebhookEvent, payload ,deliveryId);
+
+        if(triggerEvent.isEmpty()){
+            throw new WebhookParseException("Unsupported GitHub event type: " + event);
         }
 
         // trigger logic starts here

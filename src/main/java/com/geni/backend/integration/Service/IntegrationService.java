@@ -13,6 +13,7 @@ public interface IntegrationService {
 
     public InstallResult createIntegration(IntegrationCreateRequest createRequest);
     public void handleCallback(String connectorType , Map<String,String> params) throws NoSuchMethodException;
+    public void createIntegration(String connectorType, Map<String, String> params);
     public void createIntegration(String connectorType, Map<String, String> params, String response);
     public void deleteIntegration(Specification specification);
     public List<Integration> fetchIntegrations();

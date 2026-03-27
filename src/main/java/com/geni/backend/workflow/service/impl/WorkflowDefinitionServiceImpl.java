@@ -16,6 +16,7 @@ import com.geni.backend.workflow.enums.WorkflowStatus;
 import com.geni.backend.workflow.repository.WorkflowDefinitionRepository;
 import com.geni.backend.workflow.service.WorkflowDefinitionService;
 import com.geni.backend.workflow.validation.DagValidator;
+import com.geni.backend.workflow.validation.WorkflowReferenceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
 
     private final WorkflowDefinitionRepository repo;
     private final DagValidator dagValidator;
+    private final WorkflowReferenceValidator workflowReferenceValidator;
     private final ActionDefinitionRegistry actionRegistry;
 
     // UserContext will be injected here once the user layer is added:
@@ -40,8 +42,8 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
 
     @Override
     public WorkflowDefinitionResponse create(CreateWorkflowRequest request) {
+        workflowReferenceValidator.validate(request);
         dagValidator.validate(request.getSteps());
-        // TODO : we need another validator which checks ActionDefinitions , triggerDefinition , integration existence etc before saving the workflow definition
         var wf = new WorkflowDefinition();
         // wf.setUserId(userContext.currentUserId());   // TODO uncomment when UserContext is ready
         applyRequest(wf, request);
@@ -69,6 +71,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
 
     @Override
     public WorkflowDefinitionResponse update(UUID id, CreateWorkflowRequest request) {
+        workflowReferenceValidator.validate(request);
         dagValidator.validate(request.getSteps());
 
         var wf = findById(id);
@@ -122,7 +125,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
 
         var actionDef = actionRegistry.findOrThrow(req.getActionDefinitionId());
         if (actionDef.isRequiresIntegration()
-                && (req.getIntegrationId() == null || req.getIntegrationId().isBlank())) {
+                && (req.getIntegrationId() == null)) {
             throw new WorkflowValidationException(
                     "Step '" + req.getName() + "' uses action '" + req.getActionDefinitionId()
                             + "' which requires an integration, but no integrationId was provided.");

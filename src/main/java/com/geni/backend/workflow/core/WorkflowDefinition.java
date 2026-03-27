@@ -44,8 +44,8 @@ public class WorkflowDefinition {
     @Column(name = "trigger_definition_id", nullable = false)
     private String triggerDefinitionId;
 
-    @Column(name = "trigger_integration_id", nullable = false)
-    private String triggerIntegrationId;
+    @Column(name = "trigger_integration_id")
+    private Long triggerIntegrationId;
 
     /**
      * User-supplied config values matching TriggerDefinition.configSchema.

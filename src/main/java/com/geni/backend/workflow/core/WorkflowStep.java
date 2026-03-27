@@ -117,7 +117,7 @@ public class WorkflowStep {
      * May differ from the trigger's integration. It can be nullable if the action doesn't require an integration.
      */
     @Column(name = "integration_id")
-    private String integrationId;
+    private Long integrationId;
 
     /**
      * Input field mappings. Keys match ActionDefinition.inputSchema properties.

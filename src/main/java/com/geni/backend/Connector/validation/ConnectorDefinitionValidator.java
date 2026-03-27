@@ -96,4 +96,8 @@ public class ConnectorDefinitionValidator {
             );
         }
     }
+
+    public void validateDefinition(List<ConnectorDefinition> definitions) {
+        definitions.forEach(this::validateDefinition);
+    }
 }

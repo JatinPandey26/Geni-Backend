@@ -19,7 +19,7 @@ public class TriggerDefinition {
     private final String type;
     // "GITHUB_ISSUE_CREATED", "GITHUB_PR_OPENED", "SLACK_MESSAGE_RECEIVED"
     // used as key in WorkflowTrigger.triggerType
-    // used to match incoming TriggerEvent.triggerType
+    // used to match incoming TriggerEventType.triggerType
 
     private final String displayName;
     // "Issue Created" — shown in UI when user picks a trigger

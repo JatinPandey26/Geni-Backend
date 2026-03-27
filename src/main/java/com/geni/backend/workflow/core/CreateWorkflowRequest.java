@@ -44,7 +44,7 @@ public class CreateWorkflowRequest {
         String triggerDefinitionId;
 
         // nullable — MANUAL and CRON triggers don't need an integration
-        String integrationId;
+        Long integrationId;
 
         // user-supplied values matching TriggerDefinition.configSchema
         // e.g. { "repo": "my-org/my-repo", "labelFilter": "bug" }
@@ -99,7 +99,7 @@ public class CreateWorkflowRequest {
         String actionDefinitionId;
 
         // nullable — not required when ActionDefinition.requiresIntegration = false
-        String integrationId;
+        Long integrationId;
 
         // Keys = ActionDefinition.inputSchema field names
         // Values = template expressions: "{{trigger.email}}", "{{steps.<id>.output.text}}", or literals

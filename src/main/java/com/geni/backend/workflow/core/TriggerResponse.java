@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class TriggerResponse {
     public String              triggerDefinitionId;
-    public String              integrationId;
+    public Long              integrationId;
     public Map<String, Object> config;
 }
 

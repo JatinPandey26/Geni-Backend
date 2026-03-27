@@ -11,6 +11,7 @@ import com.geni.backend.integration.Integration;
 import com.geni.backend.integration.Service.IntegrationService;
 import com.geni.backend.integration.endpoint.IntegrationCreateRequest;
 import com.geni.backend.integration.repository.IntegrationRepository;
+import com.geni.backend.secret.service.SecretService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,6 +28,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     private final ConnectorService connectorService;
     private final ConnectorDefinitionValidator connectorDefinitionValidator;
     private final IntegrationRepository integrationRepository;
+    private final SecretService secretService;;
 
     @Override
     public InstallResult createIntegration(IntegrationCreateRequest createRequest) {
@@ -54,6 +56,11 @@ public class IntegrationServiceImpl implements IntegrationService {
 
         Integration integration = toIntegration(result);
         persist(integration);
+    }
+
+    @Override
+    public void createIntegration(String connectorType, Map<String, String> params) {
+        createIntegration(connectorType,params,null);
     }
 
     @Override
@@ -88,19 +95,41 @@ public class IntegrationServiceImpl implements IntegrationService {
     @Transactional
     private Integration persist(Integration integration) {
 
-        // result carries everything — no assembly needed
+        Integration existingIntegration = integrationRepository.findByConnectorTypeAndExternalId(integration.getConnectorType(), integration.getExternalId())
+                .orElse(null);
+
+        if(existingIntegration != null) {
+            // Update existing integration
+            existingIntegration.setName(integration.getName());
+            existingIntegration.setEnabled(integration.isEnabled());
+            existingIntegration.setCredentialRef(integration.getCredentialRef());
+            existingIntegration.setMetadata(integration.getMetadata());
+            integration = existingIntegration;
+        }
+
+
         integration = integrationRepository.save(integration);
+
 
         return integration;
     }
 
 
     Integration toIntegration(InstallCallbackResult result){
+
+
+        String credentialRef = null;
+        // KEY - CONNECTOR_TYPE_EXTERNAL_ID;
+        if(result.hasCredentials()) {
+            String secretKey = result.getConnectorType() + "_" + result.getExternalId();
+            credentialRef = secretService.storeSecret(secretKey,result.getCredentials());
+        }
+
         return Integration.builder()
                 .name(result.getName())
                 .enabled(Boolean.TRUE)
                 .connectorType(result.getConnectorType())
-                .credentialRef("TODO THIS") // TODO: result.getCredentials() should be transformed to ref
+                .credentialRef(credentialRef) // TODO: result.getCredentials() should be transformed to ref
                 .metadata(result.getMetadata())
                 .externalId(result.getExternalId())
                 .userId(null) // TODO : change when user layer comes in

@@ -79,6 +79,42 @@ public class GithubWebhookPayload {
 
         @JsonProperty("private")
         private boolean isPrivate;
+
+        @JsonProperty("issue")
+        private Issue issue;
+
+    }
+
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Issue {
+
+        @JsonProperty("number")
+        private Integer number;
+
+        @JsonProperty("title")
+        private String title;
+
+        @JsonProperty("body")
+        private String body;
+
+        @JsonProperty("html_url")
+        private String htmlUrl;
+
+        @JsonProperty("state")
+        private String state;
+
+        @JsonProperty("labels")
+        private List<Label> labels;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Label {
+
+        @JsonProperty("name")
+        private String name;
     }
 
     @Data

@@ -1,16 +1,19 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 import com.geni.backend.Connector.ConnectorType;
+import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
 import com.geni.backend.trigger.core.TriggerBaseDefinition;
 import com.geni.backend.trigger.core.TriggerDefinition;
+import com.geni.backend.trigger.core.TriggerEvent;
+import com.geni.backend.workflow.core.WorkflowTriggerView;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class GithubIssueCreatedTriggerDefinition implements TriggerBaseDefinition {
-
 
     @Override
     public TriggerDefinition getTriggerDefinition() {
@@ -33,5 +36,12 @@ public class GithubIssueCreatedTriggerDefinition implements TriggerBaseDefinitio
                 ))
                 .build();
     }
+
+    @Override
+    public <GithubWebhookPayload> List<WorkflowTriggerView> filter(List<WorkflowTriggerView> workflowTriggerViews, TriggerEvent<GithubWebhookPayload> triggerEvent) {
+        // TODO: filter by payload and workflowTrigger configuration like repo_name and label etc
+        return List.of();
+    }
+
 
 }

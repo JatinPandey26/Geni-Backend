@@ -1,5 +1,6 @@
 package com.geni.backend.Connector;
 
+import com.geni.backend.Connector.validation.ConnectorDefinitionValidator;
 import com.geni.backend.common.exception.UnknownConnectorException;
 import com.geni.backend.Connector.handler.ConnectorHandler;
 import org.springframework.stereotype.Component;
@@ -15,10 +16,11 @@ public class ConnectorRegistry {
 
     Map<ConnectorType,ConnectorDefinition> connectorDefinitionsMap;
     Map<ConnectorType,ConnectorHandler> connectorHandlersMap;
+    ConnectorDefinitionValidator connectorDefinitionValidator;
 
 
     public ConnectorRegistry(List<ConnectorDefinition> connectorDefinitions, List<ConnectorHandler> connectorHandlers) {
-
+        connectorDefinitionValidator.validateDefinition(connectorDefinitions);
         connectorDefinitionsMap = connectorDefinitions.stream().collect(Collectors.toUnmodifiableMap(ConnectorDefinition::getType, Function.identity()));
         connectorHandlersMap = connectorHandlers.stream().collect(Collectors.toUnmodifiableMap(ConnectorHandler::connectorType,Function.identity()));
         validate();
