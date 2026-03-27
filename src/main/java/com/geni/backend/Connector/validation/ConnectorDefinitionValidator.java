@@ -4,6 +4,7 @@ import com.geni.backend.Connector.ConnectorDefinition;
 import com.geni.backend.Connector.ConnectorRegistry;
 import com.geni.backend.common.exception.CredentialValidationException;
 import com.geni.backend.common.CredentialField;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,11 @@ import java.util.Set;
 public class ConnectorDefinitionValidator {
 
     private final ConnectorRegistry connectorRegistry;
+
+    @PostConstruct
+    public void validateAllDefinitions() {
+        validateDefinition(connectorRegistry.allDefinitions());
+    }
 
     // called before install — validates body has all required credential fields
     public void validateCredentials(String connectorType, Map<String, Object> body) {
@@ -95,5 +101,9 @@ public class ConnectorDefinitionValidator {
                     "Invalid ConnectorDefinition [" + definition.getType() + "]: " + errors
             );
         }
+    }
+
+    public void validateDefinition(List<ConnectorDefinition> definitions) {
+        definitions.forEach(this::validateDefinition);
     }
 }

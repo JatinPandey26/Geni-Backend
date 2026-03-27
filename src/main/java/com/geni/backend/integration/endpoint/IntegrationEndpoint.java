@@ -106,6 +106,37 @@ public class IntegrationEndpoint {
         }
     }
 
+    @GetMapping("/{connectorType}/callback")
+    public void handleCallbackGet(@PathVariable String connectorType,
+                               @RequestParam Map<String, String> params) throws NoSuchMethodException {
+        log.info("Handling callback for connector type: {}", connectorType);
+        log.debug("Callback parameters: {}", params);
+
+        if (connectorType == null || connectorType.trim().isEmpty()) {
+            log.warn("Invalid callback request - empty connector type");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Connector type is required");
+        }
+
+        try {
+            // Validate connector type exists
+            ConnectorType.valueOf(connectorType.toUpperCase());
+            integrationService.handleCallback(connectorType, params);
+            log.info("Callback processed successfully for connector type: {}", connectorType);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid connector type provided in callback: {}", connectorType, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid connector type: " + connectorType, e);
+        } catch (NoSuchMethodException e) {
+            log.error("No handler method found for connector type: {}", connectorType, e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error processing callback for connector type: {}", connectorType, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to process callback", e);
+        }
+    }
+
     /**
      * Retrieves all integrations across all connector types.
      *

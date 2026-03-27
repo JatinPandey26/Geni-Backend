@@ -20,7 +20,7 @@ public class StepResponse {
     String              edgeLabel;
 
     String actionDefinitionId;
-    String integrationId;
+    Long integrationId;
 
     Map<String, String> fieldMappings;
 
