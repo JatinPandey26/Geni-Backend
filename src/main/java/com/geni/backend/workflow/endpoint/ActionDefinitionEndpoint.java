@@ -30,10 +30,10 @@ public class ActionDefinitionEndpoint {
                 : service.listAll();
     }
 
-    // GET /api/v1/actions/{type}
+    // GET /api/v1/actions/{triggerType}
     // e.g. GET /api/v1/actions/GMAIL_SEND_EMAIL
     // Returns full inputSchema + outputSchema so the UI can render the field mapper
-    @GetMapping("/{type}")
+    @GetMapping("/{triggerType}")
     public ActionDefinitionResponse get(@PathVariable String type) {
         return service.getByType(type);
     }

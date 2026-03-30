@@ -110,7 +110,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
     private void applyRequest(WorkflowDefinition wf, CreateWorkflowRequest req) {
         wf.setName(req.getName());
         wf.setDescription(req.getDescription());
-        wf.setTriggerDefinitionId(req.getTrigger().getTriggerDefinitionId());
+        wf.setTriggerType(req.getTrigger().getTriggerDefinitionId());
         wf.setTriggerIntegrationId(req.getTrigger().getIntegrationId());
         wf.setTriggerConfig(
                 req.getTrigger().getConfig() != null ? req.getTrigger().getConfig() :  Map.of());
@@ -175,7 +175,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
 
     private WorkflowDefinitionResponse toResponse(WorkflowDefinition wf) {
         var trigger = new TriggerResponse(
-                wf.getTriggerDefinitionId(),
+                wf.getTriggerType(),
                 wf.getTriggerIntegrationId(),
                 wf.getTriggerConfig()
         );

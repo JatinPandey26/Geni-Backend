@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 /**
  * Sealed hierarchy for edge conditions stored as JSONB.
  *
- * Discriminator field: "type"
+ * Discriminator field: "triggerType"
  *   STRUCTURED → StructuredCondition
  *   SPEL       → SpelCondition
  *

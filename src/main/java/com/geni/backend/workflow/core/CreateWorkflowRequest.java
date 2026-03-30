@@ -84,7 +84,7 @@ public class CreateWorkflowRequest {
          * Gate condition on the edge from parent → this step.
          * null = unconditional (always fires when parent completes).
          *
-         * Two shapes (discriminated by "type"):
+         * Two shapes (discriminated by "triggerType"):
          *   STRUCTURED → { field, operator, value }
          *   SPEL       → { expression }
          *

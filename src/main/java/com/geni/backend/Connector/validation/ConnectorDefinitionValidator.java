@@ -67,7 +67,7 @@ public class ConnectorDefinitionValidator {
         List<String> errors = new ArrayList<>();
 
         if (definition.getType() == null) {
-            errors.add("ConnectorDefinition must have a type");
+            errors.add("ConnectorDefinition must have a triggerType");
         }
 
         if (definition.getDisplayName() == null || definition.getDisplayName().isBlank()) {

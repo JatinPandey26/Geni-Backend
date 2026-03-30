@@ -1,7 +1,8 @@
 package com.geni.backend.trigger.service.impl;
 
 import com.geni.backend.trigger.core.TriggerDefinition;
-import com.geni.backend.trigger.core.TriggerRegistry;
+import com.geni.backend.trigger.core.TriggerHandler;
+import com.geni.backend.trigger.core.TriggerHandlerRegistry;
 import com.geni.backend.trigger.service.TriggerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,21 +13,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TriggerServiceImpl implements TriggerService {
 
-    private final TriggerRegistry triggerRegistry;
+    private final TriggerHandlerRegistry triggerHandlerRegistry;
 
     @Override
     public List<TriggerDefinition> getTriggerDefinitions() {
-        return triggerRegistry.getAll();
+        return triggerHandlerRegistry.getAll().stream().map(TriggerHandler::definition).toList();
     }
 
     @Override
     public List<TriggerDefinition> getTriggerDefinitionsForConnector(String connectorType) {
-        return triggerRegistry.getByConnector(connectorType);
+        List<TriggerHandler<?>> handlers = triggerHandlerRegistry.getByConnector(connectorType);
+        return handlers.stream()
+                .map(TriggerHandler::definition)
+                .toList();
     }
 
     @Override
     public TriggerDefinition getTriggerDefinition(String triggerType) {
-        return triggerRegistry.getByType(triggerType);
+        return triggerHandlerRegistry.getByTriggerType(triggerType).definition();
+    }
+
+    @Override
+    public TriggerHandler<?> getTriggerHandlersForTrigger(String triggerType) {
+        return triggerHandlerRegistry.getByTriggerType(triggerType);
+    }
+
+    @Override
+    public List<TriggerHandler<?>> getTriggerHandlersForConnector(String connectorType) {
+        return triggerHandlerRegistry.getByConnector(connectorType);
     }
 
 

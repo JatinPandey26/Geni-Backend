@@ -3,7 +3,7 @@ package com.geni.backend.trigger.validator;
 import com.geni.backend.common.exception.WorkflowValidationException;
 import com.geni.backend.trigger.core.TriggerDefinition;
 
-import com.geni.backend.trigger.core.TriggerRegistry;
+import com.geni.backend.trigger.core.TriggerHandlerRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TriggerDefinitionValidator {
 
-    private final TriggerRegistry registry;
+    private final TriggerHandlerRegistry registry;
 
     /**
      * Throws if the triggerDefinitionType is not registered.
      * Returns the found definition so callers can use it without a second lookup.
      */
     public TriggerDefinition validateExists(String triggerDefinitionType) {
-        return registry.getByType(triggerDefinitionType);
+        return registry.getByTriggerType(triggerDefinitionType).definition();
     }
 
     /**

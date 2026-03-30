@@ -12,14 +12,14 @@ import java.util.Map;
 @Getter
 @Builder
 @AllArgsConstructor
-public class TriggerDefinition {
+public  class TriggerDefinition {
 
     // ── Identity ──────────────────────────────────────────────────────
 
-    private final String type;
+    private final TriggerType type;
     // "GITHUB_ISSUE_CREATED", "GITHUB_PR_OPENED", "SLACK_MESSAGE_RECEIVED"
     // used as key in WorkflowTrigger.triggerType
-    // used to match incoming TriggerEventType.triggerType
+    // used to match incoming TriggerType.triggerType
 
     private final String displayName;
     // "Issue Created" — shown in UI when user picks a trigger

@@ -33,14 +33,14 @@ public class IntegrationEndpoint {
     private final IntegrationService integrationService;
 
     /**
-     * Creates a new integration with the specified connector type and credentials.
+     * Creates a new integration with the specified connector triggerType and credentials.
      *
-     * @param integrationCreateRequest the request containing connector type and credential fields
+     * @param integrationCreateRequest the request containing connector triggerType and credential fields
      * @return ApiResponse containing the InstallResult with integration details
      */
     @PostMapping("/create")
     public ApiResponse<InstallResult> createIntegration(@RequestBody IntegrationCreateRequest integrationCreateRequest) {
-        log.info("Creating new integration with connector type: {}", 
+        log.info("Creating new integration with connector triggerType: {}",
                  integrationCreateRequest.getConnectorType());
         log.debug("Integration creation request details - Connector: {}, Credentials fields count: {}", 
                   integrationCreateRequest.getConnectorType(), 
@@ -51,17 +51,17 @@ public class IntegrationEndpoint {
             integrationCreateRequest.getConnectorType() == null) {
             log.warn("Invalid integration creation request received - missing required fields");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                                            "Connector type is required");
+                                            "Connector triggerType is required");
         }
 
         try {
             InstallResult installResult = this.integrationService.createIntegration(integrationCreateRequest);
-            log.info("Integration created successfully with connector type: {}", 
+            log.info("Integration created successfully with connector triggerType: {}",
                      integrationCreateRequest.getConnectorType());
             log.debug("Install result: {}", installResult);
             return ApiResponse.ok(installResult);
         } catch (Exception e) {
-            log.error("Error creating integration for connector type: {}", 
+            log.error("Error creating integration for connector triggerType: {}",
                       integrationCreateRequest.getConnectorType(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
                                             "Failed to create integration", e);
@@ -71,36 +71,36 @@ public class IntegrationEndpoint {
     /**
      * Handles OAuth/callback responses from third-party services.
      *
-     * @param connectorType the type of connector (e.g., GITHUB, SLACK)
+     * @param connectorType the triggerType of connector (e.g., GITHUB, SLACK)
      * @param params the callback parameters (e.g., authorization code)
-     * @throws NoSuchMethodException if the connector type handler is not found
+     * @throws NoSuchMethodException if the connector triggerType handler is not found
      */
     @PostMapping("/{connectorType}/callback")
     public void handleCallback(@PathVariable String connectorType,
                                @RequestParam Map<String, String> params) throws NoSuchMethodException {
-        log.info("Handling callback for connector type: {}", connectorType);
+        log.info("Handling callback for connector triggerType: {}", connectorType);
         log.debug("Callback parameters: {}", params);
 
         if (connectorType == null || connectorType.trim().isEmpty()) {
-            log.warn("Invalid callback request - empty connector type");
+            log.warn("Invalid callback request - empty connector triggerType");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                                            "Connector type is required");
+                                            "Connector triggerType is required");
         }
 
         try {
-            // Validate connector type exists
+            // Validate connector triggerType exists
             ConnectorType.valueOf(connectorType.toUpperCase());
             integrationService.handleCallback(connectorType, params);
-            log.info("Callback processed successfully for connector type: {}", connectorType);
+            log.info("Callback processed successfully for connector triggerType: {}", connectorType);
         } catch (IllegalArgumentException e) {
-            log.warn("Invalid connector type provided in callback: {}", connectorType, e);
+            log.warn("Invalid connector triggerType provided in callback: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                                            "Invalid connector type: " + connectorType, e);
+                                            "Invalid connector triggerType: " + connectorType, e);
         } catch (NoSuchMethodException e) {
-            log.error("No handler method found for connector type: {}", connectorType, e);
+            log.error("No handler method found for connector triggerType: {}", connectorType, e);
             throw e;
         } catch (Exception e) {
-            log.error("Error processing callback for connector type: {}", connectorType, e);
+            log.error("Error processing callback for connector triggerType: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
                                             "Failed to process callback", e);
         }
@@ -109,29 +109,29 @@ public class IntegrationEndpoint {
     @GetMapping("/{connectorType}/callback")
     public void handleCallbackGet(@PathVariable String connectorType,
                                @RequestParam Map<String, String> params) throws NoSuchMethodException {
-        log.info("Handling callback for connector type: {}", connectorType);
+        log.info("Handling callback for connector triggerType: {}", connectorType);
         log.debug("Callback parameters: {}", params);
 
         if (connectorType == null || connectorType.trim().isEmpty()) {
-            log.warn("Invalid callback request - empty connector type");
+            log.warn("Invalid callback request - empty connector triggerType");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Connector type is required");
+                    "Connector triggerType is required");
         }
 
         try {
-            // Validate connector type exists
+            // Validate connector triggerType exists
             ConnectorType.valueOf(connectorType.toUpperCase());
             integrationService.handleCallback(connectorType, params);
-            log.info("Callback processed successfully for connector type: {}", connectorType);
+            log.info("Callback processed successfully for connector triggerType: {}", connectorType);
         } catch (IllegalArgumentException e) {
-            log.warn("Invalid connector type provided in callback: {}", connectorType, e);
+            log.warn("Invalid connector triggerType provided in callback: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid connector type: " + connectorType, e);
+                    "Invalid connector triggerType: " + connectorType, e);
         } catch (NoSuchMethodException e) {
-            log.error("No handler method found for connector type: {}", connectorType, e);
+            log.error("No handler method found for connector triggerType: {}", connectorType, e);
             throw e;
         } catch (Exception e) {
-            log.error("Error processing callback for connector type: {}", connectorType, e);
+            log.error("Error processing callback for connector triggerType: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Failed to process callback", e);
         }
@@ -159,37 +159,37 @@ public class IntegrationEndpoint {
     }
 
     /**
-     * Retrieves all integrations for a specific connector type.
+     * Retrieves all integrations for a specific connector triggerType.
      *
-     * @param connectorType the connector type to filter by
-     * @return ApiResponse containing list of integrations for the specified connector type
+     * @param connectorType the connector triggerType to filter by
+     * @return ApiResponse containing list of integrations for the specified connector triggerType
      */
     @GetMapping("/{connectorType}")
     public ApiResponse<List<Integration>> getAllIntegrationByConnectorType(
             @PathVariable(name = "connectorType") String connectorType) {
-        log.info("Fetching integrations for connector type: {}", connectorType);
+        log.info("Fetching integrations for connector triggerType: {}", connectorType);
 
         if (connectorType == null || connectorType.trim().isEmpty()) {
-            log.warn("Invalid request - empty connector type provided");
+            log.warn("Invalid request - empty connector triggerType provided");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                                            "Connector type is required");
+                                            "Connector triggerType is required");
         }
 
         try {
             ConnectorType type = ConnectorType.valueOf(connectorType.toUpperCase());
             List<Integration> integrations = integrationService.fetchIntegrations(type);
-            log.info("Successfully fetched {} integrations for connector type: {}", 
+            log.info("Successfully fetched {} integrations for connector triggerType: {}",
                      integrations.size(), connectorType);
             log.debug("Integrations for {}: {}", connectorType, integrations);
             return ApiResponse.ok(integrations);
         } catch (IllegalArgumentException e) {
-            log.warn("Invalid connector type provided: {}", connectorType, e);
+            log.warn("Invalid connector triggerType provided: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                                            "Invalid connector type: " + connectorType, e);
+                                            "Invalid connector triggerType: " + connectorType, e);
         } catch (Exception e) {
-            log.error("Error fetching integrations for connector type: {}", connectorType, e);
+            log.error("Error fetching integrations for connector triggerType: {}", connectorType, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                                            "Failed to fetch integrations for type: " + connectorType, e);
+                                            "Failed to fetch integrations for triggerType: " + connectorType, e);
         }
     }
 }
