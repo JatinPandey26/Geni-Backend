@@ -38,7 +38,7 @@ public class TriggerHandlerRegistry {
     }
 
     public List<TriggerHandler<?>> getByConnector(String connectorType) {
-        return handlersByConnectorType.getOrDefault(connectorType, List.of());
+        return handlersByConnectorType.getOrDefault(ConnectorType.valueOf(connectorType), List.of());
     }
 
     public List<TriggerHandler> getAll() {

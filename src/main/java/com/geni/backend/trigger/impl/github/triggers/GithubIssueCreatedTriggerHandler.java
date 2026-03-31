@@ -3,6 +3,8 @@ package com.geni.backend.trigger.impl.github.triggers;
 import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
+import com.geni.backend.common.Schema;
+import com.geni.backend.common.SchemaExtractor;
 import com.geni.backend.trigger.core.TriggerDefinition;
 import com.geni.backend.trigger.core.TriggerEvent;
 import com.geni.backend.trigger.core.TriggerType;
@@ -21,6 +23,9 @@ public class GithubIssueCreatedTriggerHandler
 
     @Override
     public TriggerDefinition buildDefinition() {
+
+        Schema payloadSchema = SchemaExtractor.extract(GithubWebhookPayload.class);
+
         return TriggerDefinition.builder()
                 .type(type())
                 .displayName("Issue Created")
@@ -31,9 +36,8 @@ public class GithubIssueCreatedTriggerHandler
                         "repo", FieldSchema.string("Repository name"),
                         "label", FieldSchema.optionalString("Label")
                 ))
-                .payloadSchema(Map.of(
-                        "issue.title", FieldSchema.string("Title")
-                ))
+                .payloadSchema(payloadSchema.getFields())
+                .payloadSchemaClazz(payloadSchema.getSourceClass())
                 .build();
     }
 

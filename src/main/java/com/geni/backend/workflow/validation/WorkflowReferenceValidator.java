@@ -50,9 +50,13 @@ public class WorkflowReferenceValidator {
                 step.getActionDefinitionId(),
                 step.getIntegrationId());
 
+        if(def == null) {
+            throw new IllegalStateException("Action handler should never be null here because validateWithIntegration should throw if it doesn't exist");
+        }
+
         // 2. if integration is required, check it exists and is active
-        if (def.isRequiresIntegration()) {
-            integrationValidator.validateActiveWithConnector(step.getIntegrationId(), String.valueOf(def.getConnectorType()));
+        if (def.definition().isRequiresIntegration()) {
+            integrationValidator.validateActiveWithConnector(step.getIntegrationId(), String.valueOf(def.definition().getConnectorType()));
         }
     }
 }

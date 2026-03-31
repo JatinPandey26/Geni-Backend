@@ -41,7 +41,11 @@ public  class TriggerDefinition {
     // CRON                 → { expression: string(required) }
     // MANUAL               → {} empty
 
+    private final Class configSchemaClazz;
+
     private final Map<String, FieldSchema> payloadSchema;
+
+    private final Class payloadSchemaClazz;
     // shape of runtime data available in {{trigger.xxx}} expressions
     // GITHUB_ISSUE_CREATED → { issue.title, issue.number, issue.body, sender.login }
     // this is what node configs can reference at execution time

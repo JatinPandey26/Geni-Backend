@@ -92,6 +92,12 @@ public class IntegrationServiceImpl implements IntegrationService {
         return integrationRepository.findByConnectorType(connectorType.getType());
     }
 
+    @Override
+    public Integration fetchIntegration(Long id) {
+        return integrationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Integration not found with id: " + id));
+    }
+
     @Transactional
     private Integration persist(Integration integration) {
 

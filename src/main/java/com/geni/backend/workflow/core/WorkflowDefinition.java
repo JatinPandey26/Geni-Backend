@@ -62,7 +62,6 @@ public class WorkflowDefinition {
             orphanRemoval = true,
             fetch       = FetchType.EAGER     // always needed together
     )
-    @OrderBy("stepOrder ASC")
     private List<WorkflowStep> steps = new ArrayList<>();
 
     // ── Audit ──────────────────────────────────────────────────

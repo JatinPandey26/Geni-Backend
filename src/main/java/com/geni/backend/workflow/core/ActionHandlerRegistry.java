@@ -4,6 +4,7 @@ package com.geni.backend.workflow.core;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,36 +19,46 @@ import java.util.concurrent.ConcurrentHashMap;
  * If you have a TriggerDefinitionRegistry, this is identical.
  */
 @Component
-public class ActionDefinitionRegistry {
+public class ActionHandlerRegistry {
 
-    private final Map<String, ActionDefinition> registry = new ConcurrentHashMap<>();
+    private final Map<String, ActionHandler> registry;
+
+    public ActionHandlerRegistry(List<ActionHandler> handlers) {
+        this.registry = new ConcurrentHashMap<>();
+         handlers.forEach(h -> {
+             if (registry.containsKey(h.definition().getType())) {
+                 throw new IllegalStateException("Duplicate ActionDefinition type: " + h.definition().getType());
+             }
+             registry.put(h.definition().getType(), h);
+         });
+    }
 
     /**
      * Called at startup by each connector's @Configuration class.
      * e.g. SlackActionConfig, GithubActionConfig, CoreActionConfig
      */
-    public void register(ActionDefinition definition) {
-        registry.put(definition.getType(), definition);
+    public void register(ActionHandler handler) {
+        registry.put(String.valueOf(handler.type()), handler);
     }
 
-    public Optional<ActionDefinition> find(String type) {
+    public Optional<ActionHandler> find(String type) {
         return Optional.ofNullable(registry.get(type));
     }
 
-    public ActionDefinition findOrThrow(String type) {
+    public ActionHandler findOrThrow(String type) {
         return find(type).orElseThrow(() ->
                 new IllegalArgumentException("Unknown ActionDefinition triggerType: " + type));
     }
 
-    public Collection<ActionDefinition> all() {
+    public Collection<ActionHandler> all() {
         return registry.values();
     }
 
     /** All actions available for a given connector triggerType. */
-    public Collection<ActionDefinition> forConnector(
+    public Collection<ActionHandler> forConnector(
             com.geni.backend.Connector.ConnectorType connectorType) {
         return registry.values().stream()
-                .filter(a -> a.getConnectorType() == connectorType)
+                .filter(a -> a.definition().getConnectorType() == connectorType)
                 .toList();
     }
 }

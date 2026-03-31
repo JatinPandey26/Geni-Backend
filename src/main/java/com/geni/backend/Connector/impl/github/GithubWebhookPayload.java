@@ -2,6 +2,7 @@ package com.geni.backend.Connector.impl.github;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.geni.backend.common.TriggerPayload;
 import lombok.Data;
 
 import java.time.Instant;
@@ -12,7 +13,7 @@ import java.util.Map;
 // GithubWebhookPayload.java — add installation event fields
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GithubWebhookPayload {
+public class GithubWebhookPayload implements TriggerPayload {
 
     @JsonProperty("action")
     private String action;

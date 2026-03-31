@@ -2,7 +2,7 @@ package com.geni.backend.workflow.service.impl;
 
 
 import com.geni.backend.common.exception.WorkflowValidationException;
-import com.geni.backend.workflow.core.ActionDefinitionRegistry;
+import com.geni.backend.workflow.core.ActionHandlerRegistry;
 import com.geni.backend.workflow.core.CreateWorkflowRequest;
 import com.geni.backend.workflow.core.RetryConfig;
 import com.geni.backend.workflow.core.RetryConfigResponse;
@@ -33,7 +33,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
     private final WorkflowDefinitionRepository repo;
     private final DagValidator dagValidator;
     private final WorkflowReferenceValidator workflowReferenceValidator;
-    private final ActionDefinitionRegistry actionRegistry;
+    private final ActionHandlerRegistry actionRegistry;
 
     // UserContext will be injected here once the user layer is added:
     // private final UserContext userContext;
@@ -124,7 +124,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
     private WorkflowStep toStepEntity(CreateWorkflowRequest.StepRequest req) {
 
         var actionDef = actionRegistry.findOrThrow(req.getActionDefinitionId());
-        if (actionDef.isRequiresIntegration()
+        if (actionDef.definition().isRequiresIntegration()
                 && (req.getIntegrationId() == null)) {
             throw new WorkflowValidationException(
                     "Step '" + req.getName() + "' uses action '" + req.getActionDefinitionId()
