@@ -5,6 +5,7 @@ import com.geni.backend.Connector.client.ConnectorClient;
 import com.geni.backend.Connector.client.ConnectorClientRegistry;
 import com.geni.backend.Connector.client.GmailConnectorClient;
 import com.geni.backend.common.FieldSchema;
+import com.geni.backend.common.FieldType;
 import com.geni.backend.integration.Integration;
 import com.geni.backend.workflow.core.ActionDefinition;
 import com.geni.backend.workflow.core.ActionHandler;
@@ -55,7 +56,7 @@ public class GmailSendEmailHandler extends ActionHandler {
                         "threadId",  FieldSchema.string(
                                 "Gmail thread ID. Useful for reply chaining."),
                         "labelIds",  FieldSchema.builder()
-                                .type("string")
+                                .type(FieldType.STRING)
                                 .required(false)
                                 .description("Labels applied to the sent message.")
                                 .build()

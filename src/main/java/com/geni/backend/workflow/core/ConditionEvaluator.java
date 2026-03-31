@@ -61,7 +61,7 @@ public class ConditionEvaluator {
             return evaluateStructured(sc, context);
         }
 
-        if (condition instanceof ConditionDefinition.SpelCondition sc) {
+        if (condition instanceof SpelCondition sc) {
             return evaluateSpel(sc, context);
         }
 
@@ -133,6 +133,8 @@ public class ConditionEvaluator {
                 List<String> values = toList(conditionValue);
                 yield values.stream().noneMatch(fieldValue::equals);
             }
+            case ANY_MATCH -> evaluateAnyMatch(fieldValue, conditionValue);
+            case ALL_MATCH -> evaluateAllMatch(fieldValue, conditionValue);
         };
     }
 
@@ -184,6 +186,102 @@ public class ConditionEvaluator {
             throw new IllegalArgumentException(
                     "Cannot parse '" + value + "' as a number for numeric comparison");
         }
+    }
+
+    public boolean evaluateSimpleCondition(Object fieldValue, Operator operator, Object conditionValue) {
+        try {
+
+            if (fieldValue == null) return false;
+
+            switch (operator) {
+
+                case EQ:
+                    return fieldValue.equals(conditionValue);
+
+                case NEQ:
+                    return !fieldValue.equals(conditionValue);
+
+                case CONTAINS:
+                    return evaluateContains(fieldValue, conditionValue);
+
+                case NOT_CONTAINS:
+                    return !evaluateContains(fieldValue, conditionValue);
+
+                case IN:
+                    return evaluateIn(fieldValue, conditionValue);
+
+                case NOT_IN:
+                    return !evaluateIn(fieldValue, conditionValue);
+
+                case IS_NULL:
+                    return fieldValue == null;
+                case ANY_MATCH:
+                    return evaluateAnyMatch(fieldValue, conditionValue);
+                case ALL_MATCH:
+                    return evaluateAllMatch(fieldValue, conditionValue);
+
+                default:
+                    throw new IllegalArgumentException("Unsupported operator: " + operator);
+            }
+
+        } catch (Exception e) {
+            log.warn("Condition evaluation failed. fieldValue='{}', operator='{}', conditionValue='{}'. Error={}",
+                    fieldValue, operator, conditionValue, e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean evaluateContains(Object fieldValue, Object conditionValue) {
+
+        // string contains
+        if (fieldValue instanceof String) {
+            return ((String) fieldValue)
+                    .toLowerCase()
+                    .contains(conditionValue.toString().toLowerCase());
+        }
+
+        // array contains
+        if (fieldValue instanceof List<?>) {
+            return ((List<?>) fieldValue).contains(conditionValue);
+        }
+
+        return false;
+    }
+
+    private boolean evaluateIn(Object fieldValue, Object conditionValue) {
+
+        // conditionValue should be a list
+        if (!(conditionValue instanceof List<?> expectedList)) {
+            throw new IllegalArgumentException("IN operator requires list as conditionValue");
+        }
+
+        // fieldValue is single value
+        if (!(fieldValue instanceof List<?> actualList)) {
+            return expectedList.contains(fieldValue);
+        }
+
+        // both are lists → check intersection
+        return actualList.stream().allMatch(expectedList::contains);
+    }
+
+    private boolean evaluateAnyMatch(Object fieldValue, Object conditionValue) {
+        if (!(conditionValue instanceof List<?> expectedList)) {
+            throw new IllegalArgumentException("ANY_MATCH operator requires list as conditionValue");
+        }
+        if (!(fieldValue instanceof List<?> actualList)) {
+            throw new IllegalArgumentException("ANY_MATCH operator requires list as fieldValue");
+        }
+        return actualList.stream().anyMatch(expectedList::contains);
+    }
+
+    private boolean evaluateAllMatch(Object fieldValue, Object conditionValue) {
+        if (!(conditionValue instanceof List<?> expectedList)) {
+            throw new IllegalArgumentException("ALL_MATCH operator requires list as conditionValue");
+        }
+        if (!(fieldValue instanceof List<?> actualList)) {
+            throw new IllegalArgumentException("ALL_MATCH operator requires list as fieldValue");
+        }
+        return actualList.stream().allMatch(expectedList::contains);
     }
 
     @SuppressWarnings("unchecked")

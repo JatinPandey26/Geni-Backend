@@ -19,11 +19,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class GithubIssueCreatedTriggerHandler
+public class GithubIssueReopenedTriggerHandler
         extends TriggerHandler<GithubWebhookPayload> {
 
     private final ConditionEvaluator conditionEvaluator;
@@ -35,7 +34,7 @@ public class GithubIssueCreatedTriggerHandler
 
         return TriggerDefinition.builder()
                 .type(type())
-                .displayName("Issue Created")
+                .displayName("Issue Reopened")
                 .source("EXTERNAL")
                 .requiresIntegration(true)
                 .connectorType(ConnectorType.GITHUB)
@@ -43,7 +42,7 @@ public class GithubIssueCreatedTriggerHandler
                         "repo", FieldSchema.string("Repository name"),
                         "label", FieldSchema.builder()
                                 .type(FieldType.ARRAY)
-                                .description("Filter by issue label. Workflow will only trigger if the updated issue has this label. e.g. bug, enhancement")
+                                .description("Filter by issue label. Workflow will only trigger if the reopened issue has this label. e.g. bug, enhancement")
                                 .required(false)
                                 .allowedOperators(List.of(
                                         ConditionDefinition.StructuredCondition.Operator.ANY_MATCH,
@@ -58,7 +57,7 @@ public class GithubIssueCreatedTriggerHandler
 
     @Override
     public TriggerType type() {
-        return TriggerType.GITHUB_ISSUE_OPENED;
+        return TriggerType.GITHUB_ISSUE_REOPENED;
     }
 
     @Override

@@ -30,10 +30,14 @@ public class WorkflowReferenceValidator {
     // ── Trigger ───────────────────────────────────────────────────────────────
 
     private void validateTrigger(CreateWorkflowRequest.TriggerRequest trigger) {
+
+        // validate trigger configuration
+
         // 1. trigger definition exists + integration requirement is consistent
         var def = triggerValidator.validateWithIntegration(
                 trigger.getTriggerDefinitionId(),
-                trigger.getIntegrationId());
+                trigger.getIntegrationId()
+        ,     trigger.getConfig());
 
         // 2. if integration is required, check it exists and is active
         if (def.isRequiresIntegration()) {

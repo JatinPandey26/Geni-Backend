@@ -19,11 +19,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class GithubIssueCreatedTriggerHandler
+public class GithubPrOpenedTriggerHandler
         extends TriggerHandler<GithubWebhookPayload> {
 
     private final ConditionEvaluator conditionEvaluator;
@@ -35,21 +34,14 @@ public class GithubIssueCreatedTriggerHandler
 
         return TriggerDefinition.builder()
                 .type(type())
-                .displayName("Issue Created")
+                .displayName("Pull Request Opened")
                 .source("EXTERNAL")
                 .requiresIntegration(true)
                 .connectorType(ConnectorType.GITHUB)
                 .configSchema(Map.of(
                         "repo", FieldSchema.string("Repository name"),
-                        "label", FieldSchema.builder()
-                                .type(FieldType.ARRAY)
-                                .description("Filter by issue label. Workflow will only trigger if the updated issue has this label. e.g. bug, enhancement")
-                                .required(false)
-                                .allowedOperators(List.of(
-                                        ConditionDefinition.StructuredCondition.Operator.ANY_MATCH,
-                                        ConditionDefinition.StructuredCondition.Operator.ALL_MATCH
-                                ))
-                                .build()
+                        "base", FieldSchema.optionalString("Filter by base branch. Optional.")
+                        "to", FieldSchema.optionalString("Filter by target branch. Optional.")
                 ))
                 .payloadSchema(payloadSchema.getFields())
                 .payloadSchemaClazz(payloadSchema.getSourceClass())
@@ -58,7 +50,7 @@ public class GithubIssueCreatedTriggerHandler
 
     @Override
     public TriggerType type() {
-        return TriggerType.GITHUB_ISSUE_OPENED;
+        return TriggerType.GITHUB_PR_OPENED;
     }
 
     @Override
@@ -76,12 +68,11 @@ public class GithubIssueCreatedTriggerHandler
                         return false;
                     }
 
-                    NodeConfig labelConfig = wf.getTriggerConfig().get("label");
-                    if (labelConfig != null && labelConfig.isRequired()) {
-                        var payloadLabels = payload.getIssue().getLabels();
-                        var configLabels = labelConfig.getValue();
-
-                        return conditionEvaluator.evaluateSimpleCondition(payloadLabels,labelConfig.getOperator(),configLabels);
+                    Object baseFilter = wf.getTriggerConfig().get("base").getValue();
+                    if (baseFilter != null && payload.getPullRequest() != null && payload.getPullRequest().getBase() != null) {
+                        if (!baseFilter.toString().equals(payload.getPullRequest().getBase().getRef())) {
+                            return false;
+                        }
                     }
 
                     return true;

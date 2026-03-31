@@ -1,5 +1,6 @@
 package com.geni.backend.workflow.core;
 
+import com.geni.backend.common.NodeConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,6 @@ import java.util.Map;
 public class TriggerResponse {
     public String              triggerDefinitionId;
     public Long              integrationId;
-    public Map<String, Object> config;
+    public Map<String, NodeConfig> config;
 }
 

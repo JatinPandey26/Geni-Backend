@@ -1,6 +1,5 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
-import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
 import com.geni.backend.common.FieldType;
@@ -9,8 +8,8 @@ import com.geni.backend.common.Schema;
 import com.geni.backend.common.SchemaExtractor;
 import com.geni.backend.trigger.core.TriggerDefinition;
 import com.geni.backend.trigger.core.TriggerEvent;
-import com.geni.backend.trigger.core.TriggerType;
 import com.geni.backend.trigger.core.TriggerHandler;
+import com.geni.backend.trigger.core.TriggerType;
 import com.geni.backend.workflow.core.ConditionDefinition;
 import com.geni.backend.workflow.core.ConditionEvaluator;
 import com.geni.backend.workflow.core.WorkflowTriggerView;
@@ -19,12 +18,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class GithubIssueCreatedTriggerHandler
-        extends TriggerHandler<GithubWebhookPayload> {
+public class GithubIssueUpdatedTriggerHandler extends TriggerHandler<GithubWebhookPayload> {
 
     private final ConditionEvaluator conditionEvaluator;
 
@@ -35,38 +32,34 @@ public class GithubIssueCreatedTriggerHandler
 
         return TriggerDefinition.builder()
                 .type(type())
-                .displayName("Issue Created")
+                .displayName("Issue Updated")
                 .source("EXTERNAL")
                 .requiresIntegration(true)
-                .connectorType(ConnectorType.GITHUB)
+                .connectorType(com.geni.backend.Connector.ConnectorType.GITHUB)
                 .configSchema(Map.of(
                         "repo", FieldSchema.string("Repository name"),
                         "label", FieldSchema.builder()
-                                .type(FieldType.ARRAY)
-                                .description("Filter by issue label. Workflow will only trigger if the updated issue has this label. e.g. bug, enhancement")
-                                .required(false)
-                                .allowedOperators(List.of(
-                                        ConditionDefinition.StructuredCondition.Operator.ANY_MATCH,
-                                        ConditionDefinition.StructuredCondition.Operator.ALL_MATCH
-                                ))
+                                        .type(FieldType.ARRAY)
+                                        .description("Filter by issue label. Workflow will only trigger if the updated issue has this label. e.g. bug, enhancement")
+                                        .required(false)
+                                        .allowedOperators(List.of(
+                                                ConditionDefinition.StructuredCondition.Operator.ANY_MATCH,
+                                                ConditionDefinition.StructuredCondition.Operator.ALL_MATCH
+                                        ))
                                 .build()
                 ))
                 .payloadSchema(payloadSchema.getFields())
-                .payloadSchemaClazz(payloadSchema.getSourceClass())
+                .payloadSchemaClazz(GithubWebhookPayload.class)
                 .build();
     }
 
     @Override
-    public TriggerType type() {
-        return TriggerType.GITHUB_ISSUE_OPENED;
+    protected TriggerType type() {
+        return TriggerType.GITHUB_ISSUE_UPDATED;
     }
 
     @Override
-    public List<WorkflowTriggerView> filter(
-            List<WorkflowTriggerView> workflows,
-            TriggerEvent<?> event
-    ) {
-
+    public List<WorkflowTriggerView> filter(List<WorkflowTriggerView> workflows, TriggerEvent<?> event) {
         GithubWebhookPayload payload = (GithubWebhookPayload) event.getPayload();
 
         return workflows.stream()

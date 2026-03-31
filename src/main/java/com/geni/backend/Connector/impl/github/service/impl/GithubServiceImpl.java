@@ -40,7 +40,7 @@ public class GithubServiceImpl implements GithubService {
 
         GithubWebhookPayload payload = parse(rawBody);
 
-        GithubWebhookEvent githubWebhookEvent = GithubWebhookEvent.from(event);
+        GithubWebhookEvent githubWebhookEvent = GithubWebhookEvent.from(event,payload);
 
         if(githubWebhookEvent.equals(GithubWebhookEvent.INSTALLATION)){
             // if created

@@ -19,11 +19,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class GithubIssueCreatedTriggerHandler
+public class GithubIssueAssignedTriggerHandler
         extends TriggerHandler<GithubWebhookPayload> {
 
     private final ConditionEvaluator conditionEvaluator;
@@ -35,21 +34,13 @@ public class GithubIssueCreatedTriggerHandler
 
         return TriggerDefinition.builder()
                 .type(type())
-                .displayName("Issue Created")
+                .displayName("Issue Assigned")
                 .source("EXTERNAL")
                 .requiresIntegration(true)
                 .connectorType(ConnectorType.GITHUB)
                 .configSchema(Map.of(
                         "repo", FieldSchema.string("Repository name"),
-                        "label", FieldSchema.builder()
-                                .type(FieldType.ARRAY)
-                                .description("Filter by issue label. Workflow will only trigger if the updated issue has this label. e.g. bug, enhancement")
-                                .required(false)
-                                .allowedOperators(List.of(
-                                        ConditionDefinition.StructuredCondition.Operator.ANY_MATCH,
-                                        ConditionDefinition.StructuredCondition.Operator.ALL_MATCH
-                                ))
-                                .build()
+                        "assignee", FieldSchema.string("Filter by assignee login. Optional.")
                 ))
                 .payloadSchema(payloadSchema.getFields())
                 .payloadSchemaClazz(payloadSchema.getSourceClass())
@@ -58,7 +49,7 @@ public class GithubIssueCreatedTriggerHandler
 
     @Override
     public TriggerType type() {
-        return TriggerType.GITHUB_ISSUE_OPENED;
+        return TriggerType.GITHUB_ISSUE_ASSIGNED;
     }
 
     @Override
@@ -76,12 +67,11 @@ public class GithubIssueCreatedTriggerHandler
                         return false;
                     }
 
-                    NodeConfig labelConfig = wf.getTriggerConfig().get("label");
-                    if (labelConfig != null && labelConfig.isRequired()) {
-                        var payloadLabels = payload.getIssue().getLabels();
-                        var configLabels = labelConfig.getValue();
-
-                        return conditionEvaluator.evaluateSimpleCondition(payloadLabels,labelConfig.getOperator(),configLabels);
+                    Object assigneeFilter = wf.getTriggerConfig().get("assignee").getValue();
+                    if (assigneeFilter != null && payload.getIssue() != null && payload.getIssue().getAssignee() != null) {
+                        if (!assigneeFilter.toString().equals(payload.getIssue().getAssignee().getLogin())) {
+                            return false;
+                        }
                     }
 
                     return true;
