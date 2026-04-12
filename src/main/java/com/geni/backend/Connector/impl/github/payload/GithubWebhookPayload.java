@@ -1,4 +1,4 @@
-package com.geni.backend.Connector.impl.github;
+package com.geni.backend.Connector.impl.github.payload;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -111,6 +111,9 @@ public class GithubWebhookPayload implements TriggerPayload {
 
         @JsonProperty("issue")
         private Issue issue;
+
+        @JsonProperty("owner")
+        private Actor owner;
 
     }
 

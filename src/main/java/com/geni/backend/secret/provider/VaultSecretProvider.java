@@ -20,7 +20,7 @@ public class VaultSecretProvider implements SecretProvider{
 
     @Override
     public Map<String,Object> fetch(String key) {
-        String url = vaultProperties.getUri() + "/v2/" + key;
+        String url = vaultProperties.getUri() + "/v1/" + key;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Vault-Token", vaultProperties.getToken());
@@ -48,7 +48,7 @@ public class VaultSecretProvider implements SecretProvider{
 
     @Override
     public void delete(String key) {
-        String url = vaultProperties.getUri() + "/v2/" + key;
+        String url = vaultProperties.getUri() + "/v1/" + key;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Vault-Token", vaultProperties.getToken());

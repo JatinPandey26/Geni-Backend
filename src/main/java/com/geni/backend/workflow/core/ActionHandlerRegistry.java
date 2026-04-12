@@ -29,7 +29,7 @@ public class ActionHandlerRegistry {
              if (registry.containsKey(h.definition().getType())) {
                  throw new IllegalStateException("Duplicate ActionDefinition type: " + h.definition().getType());
              }
-             registry.put(h.definition().getType(), h);
+             registry.put(String.valueOf(h.definition().getType()), h);
          });
     }
 

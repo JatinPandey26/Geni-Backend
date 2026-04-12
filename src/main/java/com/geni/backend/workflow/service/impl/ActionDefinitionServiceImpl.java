@@ -45,7 +45,7 @@ public class ActionDefinitionServiceImpl implements ActionDefinitionService {
     private ActionDefinitionResponse toResponse(
             ActionDefinition def) {
         return ActionDefinitionResponse.builder()
-                .type(def.getType())
+                .type(String.valueOf(def.getType()))
                 .displayName(def.getDisplayName())
                 .description(def.getDescription())
                 .connectorType(def.getConnectorType())

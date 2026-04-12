@@ -38,4 +38,9 @@ public class DefaultSecretService implements SecretService {
     public void deleteSecret(String key) {
         provider.delete(key);
     }
+
+    @Override
+    public void update(String credentialRef, Map<String, Object> creds) {
+        provider.update(credentialRef,creds);
+    }
 }

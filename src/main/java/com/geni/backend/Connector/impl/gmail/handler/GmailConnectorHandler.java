@@ -1,8 +1,9 @@
-package com.geni.backend.Connector.impl.gmail;
+package com.geni.backend.Connector.impl.gmail.handler;
 
 import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.Connector.InstallResult;
 import com.geni.backend.Connector.handler.ConnectorHandler;
+import com.geni.backend.Connector.impl.gmail.config.GmailConnectorConfig;
 import com.geni.backend.integration.InstallCallbackResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,21 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GmailConnectorHandler implements ConnectorHandler {
 
-    // ── Config ─────────────────────────────────────────────────────────────────
-    // Add these to application.properties:
-    //   gmail.client-id=YOUR_CLIENT_ID
-    //   gmail.client-secret=YOUR_CLIENT_SECRET
-    //   gmail.redirect-uri=http://localhost:8080/api/v1/integrations/callback/gmail
-
-    @Value("${gmail.client-id}")
-    private String clientId;
-
-    @Value("${gmail.client-secret}")
-    private String clientSecret;
-
-    @Value("${gmail.redirect-uri}")
-    private String redirectUri;
-
     private static final String AUTH_URL   = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String TOKEN_URL  = "https://oauth2.googleapis.com/token";
     private static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
@@ -48,6 +34,8 @@ public class GmailConnectorHandler implements ConnectorHandler {
             "https://www.googleapis.com/auth/userinfo.email",
             "https://www.googleapis.com/auth/userinfo.profile"
     );
+
+    private final GmailConnectorConfig config;
 
     private final RestTemplate restTemplate;
 
@@ -68,8 +56,8 @@ public class GmailConnectorHandler implements ConnectorHandler {
     @Override
     public InstallResult install(Map<String, Object> body, String stateToken) {
         String url = UriComponentsBuilder.fromPath(AUTH_URL)
-                .queryParam("client_id",     clientId)
-                .queryParam("redirect_uri",  redirectUri)
+                .queryParam("client_id",     config.getClientId())
+                .queryParam("redirect_uri",  config.getRedirectUri())
                 .queryParam("response_type", "code")
                 .queryParam("scope",         String.join(" ", SCOPES))
                 .queryParam("access_type",   "offline")   // request refresh_token
@@ -111,6 +99,9 @@ public class GmailConnectorHandler implements ConnectorHandler {
         // Fetch user email to name the integration
         String userEmail = fetchUserEmail(accessToken);
 
+        // setup Gmail watch for new email notifications (PUSH not polling)
+        Map<String,Object> watchResponse = setupWatch(accessToken);
+
         return InstallCallbackResult.builder()
                 .name(userEmail + " (Gmail)")
                 .connectorType(ConnectorType.GMAIL.name())
@@ -118,7 +109,9 @@ public class GmailConnectorHandler implements ConnectorHandler {
                 .metadata(Map.of(
                         "email",     userEmail,
                         "tokenType", tokenType != null ? tokenType : "Bearer",
-                        "expiresIn", expiresIn != null ? expiresIn : 3600
+                        "expiresIn", expiresIn != null ? expiresIn : 3600,
+                        "historyId", watchResponse.get("historyId"),
+                        "watchExpiresIn", watchResponse.get("expiration")
                 ))
                 .credentials(Map.of(
                         "access_token",  accessToken,
@@ -147,9 +140,9 @@ public class GmailConnectorHandler implements ConnectorHandler {
 
         var body = new LinkedMultiValueMap<String, String>();
         body.add("code",          code);
-        body.add("client_id",     clientId);
-        body.add("client_secret", clientSecret);
-        body.add("redirect_uri",  redirectUri);
+        body.add("client_id",     config.getClientId());
+        body.add("client_secret", config.getClientSecret());
+        body.add("redirect_uri", config.getRedirectUri());
         body.add("grant_type",    "authorization_code");
 
         var response = restTemplate.exchange(
@@ -161,6 +154,29 @@ public class GmailConnectorHandler implements ConnectorHandler {
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
             throw new RuntimeException("Gmail token exchange failed: " + response.getStatusCode());
+        }
+
+        return (Map<String, Object>) response.getBody();
+    }
+
+    private Map<String,Object> setupWatch(String accessToken){
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        Map<String, Object> requestBody = Map.of(
+                "topicName", config.getGlobalTopicName(),
+                "labelIds", List.of("INBOX") // optional filter
+        );
+
+        var response = restTemplate.exchange(
+                config.getWatchUrl(),
+                HttpMethod.POST,
+                new HttpEntity<>(requestBody, headers),
+                Map.class
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new RuntimeException("Failed to setup Gmail watch: " + response.getStatusCode());
         }
 
         return (Map<String, Object>) response.getBody();

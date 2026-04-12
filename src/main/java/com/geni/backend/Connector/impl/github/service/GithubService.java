@@ -1,6 +1,6 @@
 package com.geni.backend.Connector.impl.github.service;
 
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 
 import java.util.Map;
 

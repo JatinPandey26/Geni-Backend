@@ -1,9 +1,8 @@
 package com.geni.backend.workflow.actions.email;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.Connector.client.ConnectorClient;
 import com.geni.backend.Connector.client.ConnectorClientRegistry;
-import com.geni.backend.Connector.client.GmailConnectorClient;
+import com.geni.backend.Connector.impl.gmail.client.GmailConnectorClient;
 import com.geni.backend.common.FieldSchema;
 import com.geni.backend.common.FieldType;
 import com.geni.backend.integration.Integration;
@@ -30,22 +29,22 @@ public class GmailSendEmailHandler extends ActionHandler {
     public ActionDefinition buildDefinition() {
 
         return ActionDefinition.builder()
-                .type("GMAIL_SEND_EMAIL")
+                .type(ActionType.GMAIL_SEND_EMAIL)
                 .displayName("Send email")
                 .description("Send an email from the authenticated Gmail account.")
                 .connectorType(ConnectorType.GMAIL)
                 .requiresIntegration(true)
                 .inputSchema(Map.of(
-                        "to",      FieldSchema.string(
+                        "to", FieldSchema.string(
                                 "Recipient email address. e.g. {{trigger.from}}"),
                         "subject", FieldSchema.string(
                                 "Email subject line. e.g. Re: {{trigger.subject}}"),
-                        "body",    FieldSchema.string(
+                        "body", FieldSchema.string(
                                 "Email body. Plain text or HTML. " +
                                         "e.g. {{steps.<id>.output.summary}}"),
-                        "cc",      FieldSchema.optionalString(
+                        "cc", FieldSchema.optionalString(
                                 "CC recipients, comma-separated."),
-                        "bcc",     FieldSchema.optionalString(
+                        "bcc", FieldSchema.optionalString(
                                 "BCC recipients, comma-separated."),
                         "replyTo", FieldSchema.optionalString(
                                 "Reply-to address. Defaults to the sender.")
@@ -53,9 +52,9 @@ public class GmailSendEmailHandler extends ActionHandler {
                 .outputSchema(Map.of(
                         "messageId", FieldSchema.string(
                                 "Gmail message ID of the sent email."),
-                        "threadId",  FieldSchema.string(
+                        "threadId", FieldSchema.string(
                                 "Gmail thread ID. Useful for reply chaining."),
-                        "labelIds",  FieldSchema.builder()
+                        "labelIds", FieldSchema.builder()
                                 .type(FieldType.STRING)
                                 .required(false)
                                 .description("Labels applied to the sent message.")
@@ -70,11 +69,11 @@ public class GmailSendEmailHandler extends ActionHandler {
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> inputs, ExecutionContext context , Integration integration) {
+    public Map<String, Object> execute(Map<String, Object> inputs, ExecutionContext context, Integration integration) {
         validateInputs(inputs);
         GmailConnectorClient connectorClient = (GmailConnectorClient) this.connectorClientRegistry.find(ConnectorType.valueOf(integration.getConnectorType()));
         String rawEmail = buildRaw(inputs);
-        Map<String,Object> resp = connectorClient.sendEmail(integration,rawEmail);
+        Map<String, Object> resp = connectorClient.sendEmail(integration, rawEmail);
 
         log.debug("Email sent successfully. Response: {}", resp);
 
@@ -111,11 +110,11 @@ public class GmailSendEmailHandler extends ActionHandler {
     }
 
     private String buildRaw(Map<String, Object> inputs) {
-        String to      = (String) inputs.get("to");
+        String to = (String) inputs.get("to");
         String subject = (String) inputs.get("subject");
-        String body    = (String) inputs.get("body");
-        String cc      = (String) inputs.get("cc");
-        String bcc     = (String) inputs.get("bcc");
+        String body = (String) inputs.get("body");
+        String cc = (String) inputs.get("cc");
+        String bcc = (String) inputs.get("bcc");
         String replyTo = (String) inputs.get("replyTo");
 
         return Base64.getUrlEncoder().withoutPadding()
@@ -127,9 +126,9 @@ public class GmailSendEmailHandler extends ActionHandler {
         StringBuilder sb = new StringBuilder();
         sb.append("To: ").append(to).append("\r\n");
         sb.append("Subject: ").append(subject).append("\r\n");
-        if (cc      != null && !cc.isBlank())      sb.append("Cc: ").append(cc).append("\r\n");
-        if (bcc     != null && !bcc.isBlank())      sb.append("Bcc: ").append(bcc).append("\r\n");
-        if (replyTo != null && !replyTo.isBlank())  sb.append("Reply-To: ").append(replyTo).append("\r\n");
+        if (cc != null && !cc.isBlank()) sb.append("Cc: ").append(cc).append("\r\n");
+        if (bcc != null && !bcc.isBlank()) sb.append("Bcc: ").append(bcc).append("\r\n");
+        if (replyTo != null && !replyTo.isBlank()) sb.append("Reply-To: ").append(replyTo).append("\r\n");
         sb.append("Content-Type: text/plain; charset=utf-8\r\nMIME-Version: 1.0\r\n\r\n");
         sb.append(body);
         return sb.toString();

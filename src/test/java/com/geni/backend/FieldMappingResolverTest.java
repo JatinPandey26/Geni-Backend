@@ -33,7 +33,7 @@ class FieldMappingResolverTest {
         context = new ExecutionContext(triggerPayload);
 
         // step A output
-        context.addStepOutput(STEP_A, Map.of(
+        context.addStepOutput(STEP_A.toString(), Map.of(
                 "summary", "Short summary of the issue",
                 "tags",    "critical,urgent"
         ));
@@ -110,7 +110,7 @@ class FieldMappingResolverTest {
 
     @Test
     void resolve_full_mapping() {
-        Map<String, String> fieldMappings = Map.of(
+        Map<String, Object> fieldMappings = Map.of(
                 "to",      "jatin@gmail.com",
                 "subject", "Bug: {{trigger.issue.title}}",
                 "body",    "Reported by {{trigger.sender.login}}\n{{steps." + STEP_A + ".output.summary}}"

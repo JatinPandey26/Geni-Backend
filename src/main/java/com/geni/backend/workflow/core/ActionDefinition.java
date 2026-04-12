@@ -16,7 +16,7 @@ public class ActionDefinition {
 
     // ── Identity ──────────────────────────────────────────────────────
 
-    private final String type;
+    private final ActionType type;
     // Unique key — e.g. "SLACK_POST_MESSAGE", "GITHUB_CREATE_ISSUE", "CORE_HTTP_REQUEST"
     // Used as WorkflowStep.actionDefinitionId
     // Convention: {CONNECTOR_TYPE}_{VERB}_{NOUN}

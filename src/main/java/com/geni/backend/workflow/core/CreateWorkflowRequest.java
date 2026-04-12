@@ -105,7 +105,7 @@ public class CreateWorkflowRequest {
 
         // Keys = ActionDefinition.inputSchema field names
         // Values = template expressions: "{{trigger.email}}", "{{steps.<id>.output.text}}", or literals
-        Map<String, String> fieldMappings;
+        Map<String, Object> fieldMappings;
 
         @NotNull
         OnErrorStrategy onError;

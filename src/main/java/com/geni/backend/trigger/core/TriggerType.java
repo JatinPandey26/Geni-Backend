@@ -12,4 +12,7 @@ public enum TriggerType {
     GITHUB_REVIEW_SUBMITTED,
     GITHUB_PR_COMMENT_ADDED,
     GITHUB_PUSH,
+
+    // GMAIL
+    GMAIL_NEW_EMAIL,
 }

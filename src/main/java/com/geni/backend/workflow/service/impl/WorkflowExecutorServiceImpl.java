@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,13 +34,14 @@ public class WorkflowExecutorServiceImpl implements WorkflowExecutorService {
         }
 
         ConnectorType connectorType = triggerHandler.definition().getConnectorType();
-        List<WorkflowTriggerView> workflowTriggerViews = workflowDefinitionRepository.findByTriggerType(triggerHandler.definition().getType().name());
+        List<WorkflowTriggerView> workflowTriggerViews = workflowDefinitionRepository.findByTriggerType(triggerHandler.definition().getType().name(),triggerHandler.definition().isRequiresIntegration());
         List<WorkflowTriggerView> matchedWorkflows = triggerHandler.filter(workflowTriggerViews,triggerEvent);
 
         // submit to executor
         log.info("Submitting workflow execution for trigger event: {} to {} workflows", triggerEvent.getTriggerType(), matchedWorkflows.size());
 
         List<WorkflowDefinition> workflowDefinitions = workflowDefinitionRepository.findAllById(matchedWorkflows.stream().map(WorkflowTriggerView::getWorkflowId).toList());
+        log.debug("Workflows to execute -> {}", workflowDefinitions.stream().map(wd -> wd.getId()).collect(Collectors.toSet()));
 
         workflowExecutor.execute(workflowDefinitions, triggerEvent.getPayload());
     }

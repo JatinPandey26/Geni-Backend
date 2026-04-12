@@ -1,7 +1,11 @@
-package com.geni.backend.Connector.impl.github;
+package com.geni.backend.Connector.impl.github.handler;
 
 import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.Connector.InstallResult;
+import com.geni.backend.Connector.impl.github.config.GithubAppConfig;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookEvent;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.client.GithubConnectorClient;
 import com.geni.backend.common.exception.WebhookParseException;
 import com.geni.backend.Connector.handler.ConnectorHandler;
 import com.geni.backend.common.IntegrationClient;
@@ -24,11 +28,12 @@ import java.util.Map;
 public class GithubConnectorHandler implements ConnectorHandler {
 
     private final GithubAppConfig githubAppConfig;
-    private final GithubApiClient githubApiClient;
+    private final GithubConnectorClient githubConnectorClient;
     private final ObjectMapper objectMapper;
 
     private static final String GITHUB_EVENT_HEADER = "X-GitHub-Event";
     private static final String INSTALLATION_ID_KEY = "installationId";
+    private static final String OWNER_KEY = "owner";
 
     /**
      * Returns the connector triggerType this handler manages.
@@ -143,18 +148,23 @@ public class GithubConnectorHandler implements ConnectorHandler {
             log.error("GitHub webhook payload has invalid installation ID: {}", installationId);
             throw new WebhookParseException("GitHub installation ID must be a positive number");
         }
-
+        GithubWebhookPayload githubWebhookPayload = parse(response);
         // Parse webhook event
-        GithubWebhookEvent githubWebhookEvent = GithubWebhookEvent.from(event);
+        GithubWebhookEvent githubWebhookEvent = GithubWebhookEvent.from(event,githubWebhookPayload);
         log.debug("Parsed webhook event: {}", githubWebhookEvent);
+
+        // fetch access token
+
+        Map<String,Object> githubAccessToken = githubConnectorClient.getAccessToken(String.valueOf(installationId));
 
         // Build installation callback result
         InstallCallbackResult installCallbackResult = InstallCallbackResult.builder()
                 .name(accountLogin + " GitHub")
                 .connectorType(ConnectorType.GITHUB.getType())
-                .credentials(Map.of())
+                .credentials(githubAccessToken)
                 .externalId(String.valueOf(installationId))
-                .metadata(Map.of(INSTALLATION_ID_KEY, installationId))
+                .metadata(Map.of(INSTALLATION_ID_KEY, installationId,
+                                OWNER_KEY,githubWebhookPayload.getInstallation().getAccount().getLogin()))
                 .build();
 
         log.info("GitHub webhook callback processed successfully - Installation ID: {}, Account: {}", 

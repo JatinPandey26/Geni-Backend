@@ -1,4 +1,4 @@
-package com.geni.backend.Connector.impl.github;
+package com.geni.backend.Connector.impl.github.config;
 
 import com.geni.backend.common.exception.WebhookSignatureException;
 import io.jsonwebtoken.Jwts;
@@ -31,7 +31,6 @@ public class GithubAppConfig {
     private String clientId;
     private String webhookSecret;
     private String privateKeyPath;
-
     private PrivateKey privateKey;
 
     @PostConstruct
@@ -39,7 +38,6 @@ public class GithubAppConfig {
         this.privateKey = loadPrivateKey();
     }
 
-    // ── JWT ──────────────────────────────────────────────────────────
 
     public String buildJwt() {
         Instant now = Instant.now();
@@ -51,7 +49,6 @@ public class GithubAppConfig {
                 .compact();
     }
 
-    // ── Webhook signature verification ───────────────────────────────
 
     public void verifyWebhookSignature(String rawBody, String signatureHeader) {
         if (signatureHeader == null || signatureHeader.isBlank()) {

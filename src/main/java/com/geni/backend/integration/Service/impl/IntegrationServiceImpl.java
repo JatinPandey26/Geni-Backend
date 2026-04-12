@@ -98,6 +98,19 @@ public class IntegrationServiceImpl implements IntegrationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Integration not found with id: " + id));
     }
 
+    @Override
+    public Integration fetchByConnectorTypeAndExternalId(String connectorType, String externalId) {
+        return integrationRepository.findByConnectorTypeAndExternalId(connectorType,externalId).orElseThrow(
+                () -> new ResourceNotFoundException("Integration not found with connectorType " + connectorType + ", externalId : " + externalId)
+        );
+    }
+
+    @Override
+    public Integration updateIntegration(Integration integration) {
+        return
+                integrationRepository.save(integration);
+    }
+
     @Transactional
     private Integration persist(Integration integration) {
 

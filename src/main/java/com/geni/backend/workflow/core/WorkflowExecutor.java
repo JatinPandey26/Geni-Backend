@@ -56,10 +56,45 @@ public class WorkflowExecutor {
     }
 
     public void execute(List<WorkflowDefinition> workflows, TriggerPayload triggerPayload) {
-        Map <String, Object> triggerPayloadMap = parseToMap(triggerPayload);
+
+        Map<String, Object> triggerPayloadMap = parseToMap(triggerPayload);
+
+        log.info("\n==================== WORKFLOW EXECUTION START ====================\n" +
+                        "Total Workflows: {}\n" +
+                        "Trigger Type   : {}\n" +
+                        "Payload        : {}\n" +
+                        "===============================================================\n",
+                workflows.size(),
+                triggerPayload.getClass().getSimpleName(),
+                triggerPayloadMap
+        );
+
         for (WorkflowDefinition workflow : workflows) {
-            execute(workflow, triggerPayloadMap);
+
+            log.info("\n-------------------- Executing Workflow --------------------\n" +
+                            "Workflow ID   : {}\n" +
+                            "Workflow Name : {}\n" +
+                            "----------------------------------------------------------",
+                    workflow.getId(),
+                    workflow.getName()
+            );
+
+            try {
+                execute(workflow, triggerPayloadMap);
+
+                log.info("✅ Workflow SUCCESS - ID: {}\n", workflow.getId());
+
+            } catch (Exception e) {
+
+                log.error("❌ Workflow FAILED - ID: {}\nError: {}\n",
+                        workflow.getId(),
+                        e.getMessage(),
+                        e
+                );
+            }
         }
+
+        log.info("\n==================== WORKFLOW EXECUTION END ======================\n");
     }
 
     /**
@@ -70,11 +105,11 @@ public class WorkflowExecutor {
     private void runTree(WorkflowDefinition wf, WorkflowRun run,
                          ExecutionContext context) {
         // build step lookup: clientId → WorkflowStep
-        Map<UUID, WorkflowStep> stepMap = wf.getSteps().stream()
-                .collect(Collectors.toMap(WorkflowStep::getId, s -> s));
+        Map<String, WorkflowStep> stepMap = wf.getSteps().stream()
+                .collect(Collectors.toMap(s -> s.getId().toString(), s -> s));
 
         // build children index: parentClientId → [children]
-        Map<UUID, List<WorkflowStep>> childrenIndex = buildChildrenIndex(wf.getSteps());
+        Map<String, List<WorkflowStep>> childrenIndex = buildChildrenIndex(wf.getSteps());
 
         // find roots — steps with no parent
         List<WorkflowStep> roots = wf.getSteps().stream()
@@ -91,7 +126,7 @@ public class WorkflowExecutor {
     private void executeStep(WorkflowStep step,
                              WorkflowRun run,
                              ExecutionContext context,
-                             Map<UUID, List<WorkflowStep>> childrenIndex) {
+                             Map<String, List<WorkflowStep>> childrenIndex) {
 
         log.info("Executing step '{}' ({})", step.getName(), step.getId());
 
@@ -121,12 +156,14 @@ public class WorkflowExecutor {
 
         // 4. Handle result
         if (output != null) {
-            context.addStepOutput(step.getId(), output);
+//            TODO : we are using client ID because mapping are saved in client ID itself , if we are targeting saving them by mapping to db IDs then we have to change these also
+            context.addStepOutput(step.getClientId().toString(), output);
             log.info("Step '{}' succeeded", step.getName());
 
             // 5. Find and evaluate children
+//            TODO : we are using client ID because mapping are saved in client ID itself , if we are targeting saving them by mapping to db IDs then we have to change these also
             List<WorkflowStep> children = childrenIndex.getOrDefault(
-                    step.getId(), List.of());
+                    step.getClientId().toString(), List.of());
 
             for (WorkflowStep child : children) {
                 boolean conditionPasses = conditionEvaluator.evaluate(
@@ -247,11 +284,11 @@ public class WorkflowExecutor {
 
     }
 
-    private Map<UUID, List<WorkflowStep>> buildChildrenIndex(List<WorkflowStep> steps) {
-        Map<UUID, List<WorkflowStep>> index = new HashMap<>();
+    private Map<String, List<WorkflowStep>> buildChildrenIndex(List<WorkflowStep> steps) {
+        Map<String, List<WorkflowStep>> index = new HashMap<>();
         for (WorkflowStep step : steps) {
             if (step.getParentStepId() != null) {
-                index.computeIfAbsent(step.getParentStepId(), k -> new ArrayList<>())
+                index.computeIfAbsent(step.getParentStepId().toString(), k -> new ArrayList<>())
                         .add(step);
             }
         }

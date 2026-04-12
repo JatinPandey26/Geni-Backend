@@ -19,6 +19,7 @@ import com.geni.backend.workflow.validation.DagValidator;
 import com.geni.backend.workflow.validation.WorkflowReferenceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService {
 
     private final WorkflowDefinitionRepository repo;
@@ -93,6 +95,12 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
     @Override
     public void delete(UUID id) {
         repo.delete(findById(id));
+    }
+
+    @Override
+    public void removeTriggerIntegrationId(long integrationId) {
+        int clearedWfs = repo.clearIntegrationId(integrationId);
+        log.info("Removed integration Id from WFs : {} " , clearedWfs );
     }
 
     // ── Private: lookup ───────────────────────────────────────────────────────

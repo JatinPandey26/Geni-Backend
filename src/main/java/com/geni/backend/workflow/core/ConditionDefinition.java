@@ -40,7 +40,7 @@ public sealed interface ConditionDefinition
             CONTAINS, NOT_CONTAINS,
             IS_NULL, IS_NOT_NULL,
             IN, NOT_IN,
-            ANY_MATCH, ALL_MATCH  // for array fields, e.g. "trigger.tags"
+            ANY_MATCH, ALL_MATCH,NO_MATCH  // for array fields, e.g. "trigger.tags"
         }
     }
 

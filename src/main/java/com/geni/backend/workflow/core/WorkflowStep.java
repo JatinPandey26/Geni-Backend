@@ -133,7 +133,7 @@ public class WorkflowStep {
      */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "field_mappings", columnDefinition = "jsonb")
-    private Map<String, String> fieldMappings = new HashMap<>();
+    private Map<String, Object> fieldMappings = new HashMap<>();
 
     // ── Error handling ──────────────────────────────────────────
 

@@ -22,7 +22,7 @@ public class StepResponse {
     String actionDefinitionId;
     Long integrationId;
 
-    Map<String, String> fieldMappings;
+    Map<String, Object> fieldMappings;
 
     OnErrorStrategy onError;
     RetryConfigResponse retryConfig;    // null unless onError = RETRY

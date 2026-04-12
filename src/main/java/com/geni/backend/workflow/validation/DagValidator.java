@@ -7,6 +7,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -118,15 +119,18 @@ public class DagValidator {
             if (step.getFieldMappings() == null) continue;
             Set<String> ancestors = ancestors(step.getId(), parentOf);
             for (var entry : step.getFieldMappings().entrySet()) {
-                var matcher = STEP_REF.matcher(entry.getValue());
-                while (matcher.find()) {
-                    String refId = matcher.group(1);
-                    if (!ancestors.contains(refId)) {
-                        throw new WorkflowValidationException(
-                                "Step '" + step.getName() + "': field mapping '" + entry.getKey()
-                                        + "' references step '" + refId
-                                        + "' which is not an ancestor of this step. "
-                                        + "Only ancestors are guaranteed to have completed.");
+                Set<String> refs = getRefs(entry.getValue());
+                for(String ref : refs){
+                    var matcher = STEP_REF.matcher(ref);
+                    while (matcher.find()) {
+                        String refId = matcher.group(1);
+                        if (!ancestors.contains(refId)) {
+                            throw new WorkflowValidationException(
+                                    "Step '" + step.getName() + "': field mapping '" + entry.getKey()
+                                            + "' references step '" + refId
+                                            + "' which is not an ancestor of this step. "
+                                            + "Only ancestors are guaranteed to have completed.");
+                        }
                     }
                 }
             }
@@ -140,6 +144,22 @@ public class DagValidator {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private Set<String> getRefs(Object value){
+        if (value == null) {
+            throw new WorkflowValidationException("Ref cannot be null");
+        }
+
+        if (value instanceof String str) {
+           return Set.of(str);
+        }
+
+        else if (value instanceof List<?> list) {
+            return list.stream().map(Object::toString).collect(Collectors.toSet());
+        }
+
+        throw new WorkflowValidationException("Type of ref is not supported");
+    }
 
     private void dfsCycleCheck(String node,
                                Map<String, List<String>> children,

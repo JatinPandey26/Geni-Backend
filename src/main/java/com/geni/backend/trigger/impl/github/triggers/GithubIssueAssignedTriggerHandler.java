@@ -1,17 +1,14 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
-import com.geni.backend.common.FieldType;
-import com.geni.backend.common.NodeConfig;
 import com.geni.backend.common.Schema;
 import com.geni.backend.common.SchemaExtractor;
 import com.geni.backend.trigger.core.TriggerDefinition;
 import com.geni.backend.trigger.core.TriggerEvent;
 import com.geni.backend.trigger.core.TriggerType;
 import com.geni.backend.trigger.core.TriggerHandler;
-import com.geni.backend.workflow.core.ConditionDefinition;
 import com.geni.backend.workflow.core.ConditionEvaluator;
 import com.geni.backend.workflow.core.WorkflowTriggerView;
 import lombok.RequiredArgsConstructor;

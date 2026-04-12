@@ -2,9 +2,9 @@ package com.geni.backend.Connector.impl.github.service.impl;
 
 import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.common.exception.WebhookParseException;
-import com.geni.backend.Connector.impl.github.GithubAppConfig;
-import com.geni.backend.Connector.impl.github.GithubWebhookEvent;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.config.GithubAppConfig;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookEvent;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.Connector.impl.github.service.GithubService;
 import com.geni.backend.Connector.impl.github.specification.GithubIntegrationSpecification;
 import com.geni.backend.integration.Service.IntegrationService;
@@ -48,6 +48,11 @@ public class GithubServiceImpl implements GithubService {
 
             if(payload.getAction().equals("deleted")){
                 integrationService.deleteIntegration(GithubIntegrationSpecification.hasInstallationId(payload.getInstallation().getId().toString()));
+
+                //TODO : we need to remove trigger integration Id from wfs those wf triggers will become orphan if user sees them in UI they will get warning of
+                // reattaching trigger integration.
+
+
                 return;
             }
 

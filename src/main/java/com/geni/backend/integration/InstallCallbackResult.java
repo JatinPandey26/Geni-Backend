@@ -17,7 +17,7 @@ public class InstallCallbackResult {
     String externalId;
 
     // ── handled separately by service ────────────────────────────────
-    Map<String, String> credentials;     // goes to SecretProvider, not Integration row
+    Map<String, Object> credentials;     // goes to SecretProvider, not Integration row
 
     // ── domain helper ─────────────────────────────────────────────────
     public boolean hasCredentials() {

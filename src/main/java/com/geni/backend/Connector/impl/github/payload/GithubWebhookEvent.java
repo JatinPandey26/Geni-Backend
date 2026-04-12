@@ -1,15 +1,16 @@
-package com.geni.backend.Connector.impl.github;
+package com.geni.backend.Connector.impl.github.payload;
 
 import java.util.Arrays;
 
 // GithubWebhookEvent.java
 public enum GithubWebhookEvent {
 
-    ISSUE_OPENED          ("issues"),
+    ISSUE_OPENED          ("issues_opened"),
     ISSUE_CLOSED          ("issue_closed"),
     ISSUE_REOPENED        ("issue_reopened"),
     ISSUE_ASSIGNED        ("issue_assigned"),
     ISSUE_UPDATED         ("issue_updated"),
+    ISSUE_LABELED         ("issue_labeled"),
     PULL_REQUEST_OPENED    ("pull_request_opened"),
     PULL_REQUEST_MERGED    ("pull_request_merged"),
     PULL_REQUEST_REVIEW_REQUESTED ("pull_request_review_requested"),
@@ -55,6 +56,8 @@ public enum GithubWebhookEvent {
                     return ISSUE_REOPENED;
                 case "edited":
                     return ISSUE_UPDATED;
+                case "labeled":
+                    return ISSUE_LABELED;
                 // add more issue actions as needed
             }
         }

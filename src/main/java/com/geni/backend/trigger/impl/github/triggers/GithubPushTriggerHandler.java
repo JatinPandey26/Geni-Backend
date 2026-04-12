@@ -1,7 +1,7 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
 import com.geni.backend.common.Schema;
 import com.geni.backend.common.SchemaExtractor;

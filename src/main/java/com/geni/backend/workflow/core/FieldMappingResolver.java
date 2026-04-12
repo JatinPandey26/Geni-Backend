@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Resolves field mapping template expressions against an ExecutionContext.
@@ -48,20 +51,36 @@ public class FieldMappingResolver {
      * @return resolved map with all expressions replaced
      *                      e.g. { "to": "jatin@gmail.com", "subject": "Bug" }
      */
-    public Map<String, Object> resolve(Map<String, String> fieldMappings,
+    public Map<String, Object> resolve(Map<String, Object> fieldMappings,
                                        ExecutionContext context) {
         if (fieldMappings == null || fieldMappings.isEmpty()) {
             return Map.of();
         }
 
         Map<String, Object> resolved = new HashMap<>();
-        for (Map.Entry<String, String> entry : fieldMappings.entrySet()) {
-            String resolvedValue = resolveExpression(entry.getValue(), context);
+        for (Map.Entry<String, Object> entry : fieldMappings.entrySet()) {
+            Object resolvedValue = resolveExpressionTypeSpecific(entry.getValue(), context);
             resolved.put(entry.getKey(), resolvedValue);
             log.debug("Resolved mapping '{}': '{}' → '{}'",
                     entry.getKey(), entry.getValue(), resolvedValue);
         }
         return resolved;
+    }
+
+    /*
+    *  Resolves expression based on type either String or List
+    *  */
+    private Object resolveExpressionTypeSpecific(Object value , ExecutionContext context){
+
+        if (value instanceof String str) {
+            return resolveExpression(str, context);
+        }
+
+        else if (value instanceof List<?> list) {
+            return list.stream().map(Object::toString).map(s -> resolveExpression(s,context)).collect(Collectors.toSet());
+        }
+
+        return Set.of();
     }
 
     /**
@@ -166,26 +185,18 @@ public class FieldMappingResolver {
             return "";
         }
 
-        Map<String, Object> stepOutput = context.getStepOutput(stepClientId);
+        Map<String, Object> stepOutput = context.getStepOutput(stepClientId.toString());
         if (stepOutput.isEmpty()) {
             log.debug("Step {} has no output in context yet — returning empty", stepClientId);
             return "";
         }
 
-        // rest = "output.<field>" — strip "output." prefix
-        if (!rest.startsWith("output.")) {
-            log.warn("Step path must reference output: expected 'output.<field>' got '{}'", rest);
-            return "";
-        }
-
-        String fieldPath = rest.substring("output.".length()); // e.g. "summary" or "user.email"
-
         // flat key first, then nested walk
-        if (stepOutput.containsKey(fieldPath)) {
-            return toStr(stepOutput.get(fieldPath));
+        if (stepOutput.containsKey(rest)) {
+            return toStr(stepOutput.get(rest));
         }
 
-        Object value = walkPath(stepOutput, fieldPath.split("\\."));
+        Object value = walkPath(stepOutput, rest.split("\\."));
         return toStr(value);
     }
 

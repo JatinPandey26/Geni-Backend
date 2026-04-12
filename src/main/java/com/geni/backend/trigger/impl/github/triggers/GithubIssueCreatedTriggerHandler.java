@@ -1,7 +1,7 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
 import com.geni.backend.common.FieldType;
 import com.geni.backend.common.NodeConfig;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -77,8 +76,8 @@ public class GithubIssueCreatedTriggerHandler
                     }
 
                     NodeConfig labelConfig = wf.getTriggerConfig().get("label");
-                    if (labelConfig != null && labelConfig.isRequired()) {
-                        var payloadLabels = payload.getIssue().getLabels();
+                    if (labelConfig != null) {
+                        var payloadLabels = payload.getIssue().getLabels().stream().map(l -> l.getName()).toList();
                         var configLabels = labelConfig.getValue();
 
                         return conditionEvaluator.evaluateSimpleCondition(payloadLabels,labelConfig.getOperator(),configLabels);

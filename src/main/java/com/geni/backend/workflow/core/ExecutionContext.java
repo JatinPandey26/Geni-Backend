@@ -26,10 +26,10 @@ public class ExecutionContext {
     private final Map<String, Object> triggerPayload;
 
     // stepClientId → output map from that step's executor
-    private final Map<UUID, Map<String, Object>> stepOutputs;
+    private final Map<String, Map<String, Object>> stepOutputs;
 
     // stepClientId → user-supplied override inputs (rerun with modified data)
-    private final Map<UUID, Map<String, Object>> inputOverrides;
+    private final Map<String, Map<String, Object>> inputOverrides;
 
     // ── Constructors ──────────────────────────────────────────────────────────
 
@@ -43,8 +43,8 @@ public class ExecutionContext {
 
     /** Rerun — pre-populate with previous step outputs and optional overrides */
     public ExecutionContext(Map<String, Object> triggerPayload,
-                            Map<UUID, Map<String, Object>> previousOutputs,
-                            Map<UUID, Map<String, Object>> inputOverrides) {
+                            Map<String, Map<String, Object>> previousOutputs,
+                            Map<String, Map<String, Object>> inputOverrides) {
         this.triggerPayload = triggerPayload != null
                 ? triggerPayload : Collections.emptyMap();
         this.stepOutputs    = new HashMap<>(previousOutputs != null
@@ -55,7 +55,7 @@ public class ExecutionContext {
 
     // ── Write (called by engine as steps complete) ────────────────────────────
 
-    public void addStepOutput(UUID stepClientId, Map<String, Object> output) {
+    public void addStepOutput(String stepClientId, Map<String, Object> output) {
         stepOutputs.put(stepClientId, output != null ? output : Collections.emptyMap());
         log.debug("Added output for step {}: {} fields", stepClientId,
                 output != null ? output.size() : 0);
@@ -67,7 +67,7 @@ public class ExecutionContext {
         return Collections.unmodifiableMap(triggerPayload);
     }
 
-    public Map<String, Object> getStepOutput(UUID stepClientId) {
+    public Map<String, Object> getStepOutput(String stepClientId) {
         return stepOutputs.getOrDefault(stepClientId, Collections.emptyMap());
     }
 

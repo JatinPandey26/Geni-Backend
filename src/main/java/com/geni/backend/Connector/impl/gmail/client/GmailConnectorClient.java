@@ -1,15 +1,15 @@
-package com.geni.backend.Connector.client;
+package com.geni.backend.Connector.impl.gmail.client;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.secret.provider.SecretProvider;
+import com.geni.backend.Connector.client.ConnectorClient;
+import com.geni.backend.Connector.impl.gmail.config.GmailConnectorConfig;
+import com.geni.backend.secret.service.SecretService;
 import org.springframework.stereotype.Component;
-import com.geni.backend.Connector.ConnectorType;
 import com.geni.backend.integration.Integration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -24,14 +24,9 @@ public class GmailConnectorClient implements ConnectorClient {
     private static final String GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1/users/me";
     private static final String TOKEN_URL      = "https://oauth2.googleapis.com/token";
 
-    @Value("${gmail.client-id}")
-    private String clientId;
-
-    @Value("${gmail.client-secret}")
-    private String clientSecret;
-
+    private final GmailConnectorConfig config;
     private final RestTemplate restTemplate;
-    private final SecretProvider secretProvider;
+    private final SecretService secretService;
 
     // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -41,6 +36,14 @@ public class GmailConnectorClient implements ConnectorClient {
     public Map<String, Object> sendEmail(Integration integration, String rawEmailBase64) {
         return executeWithTokenRefresh(integration, accessToken ->
                 post(GMAIL_API_BASE + "/messages/send",
+                        accessToken,
+                        Map.of("raw", rawEmailBase64))
+        );
+    }
+
+    public Map<String,Object> replyToEmail(Integration integration, String messageId, String rawEmailBase64){
+        return executeWithTokenRefresh(integration, accessToken ->
+                post(GMAIL_API_BASE + "/messages/" + messageId + "/reply",
                         accessToken,
                         Map.of("raw", rawEmailBase64))
         );
@@ -89,6 +92,20 @@ public class GmailConnectorClient implements ConnectorClient {
         );
     }
 
+    public Map<String,Object> searchEmails(Integration integration, String query,int maxResults){
+        return executeWithTokenRefresh(integration, accessToken ->
+                get(GMAIL_API_BASE + "/messages?q=" + query + "&maxResults=" + maxResults, accessToken)
+        );
+    }
+
+    public Map<String, Object> getAttachment(Integration integration,
+                                             String messageId,
+                                             String attachmentId) {
+
+        return executeWithTokenRefresh(integration,(accessToken ->
+                get(GMAIL_API_BASE + "/messages/" + messageId + "/attachments/" + attachmentId,accessToken)));
+    }
+
     // ── Token refresh ──────────────────────────────────────────────────────────
 
     /**
@@ -100,7 +117,7 @@ public class GmailConnectorClient implements ConnectorClient {
             Integration integration,
             ApiCall apiCall) {
 
-        Map<String, Object> credentials = secretProvider.fetch(integration.getCredentialRef());
+        Map<String, Object> credentials = secretService.getSecret(integration.getCredentialRef(),Map.class);
         String accessToken = String.valueOf(credentials.get("access_token"));
 
         try {
@@ -142,8 +159,8 @@ public class GmailConnectorClient implements ConnectorClient {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         var body = new LinkedMultiValueMap<String, String>();
-        body.add("client_id",     clientId);
-        body.add("client_secret", clientSecret);
+        body.add("client_id", config.getClientId());
+        body.add("client_secret", config.getClientSecret());
         body.add("refresh_token", refreshToken);
         body.add("grant_type",    "refresh_token");
 
@@ -168,7 +185,7 @@ public class GmailConnectorClient implements ConnectorClient {
             }
 
             // persist new token — refresh_token stays the same unless Google rotates it
-            secretProvider.update(integration.getCredentialRef(),
+            secretService.update(integration.getCredentialRef(),
                     Map.of("access_token", newAccessToken));
 
             return newAccessToken;

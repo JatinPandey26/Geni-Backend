@@ -1,17 +1,14 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 import com.geni.backend.Connector.ConnectorType;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.common.FieldSchema;
-import com.geni.backend.common.FieldType;
-import com.geni.backend.common.NodeConfig;
 import com.geni.backend.common.Schema;
 import com.geni.backend.common.SchemaExtractor;
 import com.geni.backend.trigger.core.TriggerDefinition;
 import com.geni.backend.trigger.core.TriggerEvent;
 import com.geni.backend.trigger.core.TriggerType;
 import com.geni.backend.trigger.core.TriggerHandler;
-import com.geni.backend.workflow.core.ConditionDefinition;
 import com.geni.backend.workflow.core.ConditionEvaluator;
 import com.geni.backend.workflow.core.WorkflowTriggerView;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +37,7 @@ public class GithubPrOpenedTriggerHandler
                 .connectorType(ConnectorType.GITHUB)
                 .configSchema(Map.of(
                         "repo", FieldSchema.string("Repository name"),
-                        "base", FieldSchema.optionalString("Filter by base branch. Optional.")
+                        "base", FieldSchema.optionalString("Filter by base branch. Optional."),
                         "to", FieldSchema.optionalString("Filter by target branch. Optional.")
                 ))
                 .payloadSchema(payloadSchema.getFields())
@@ -71,6 +68,13 @@ public class GithubPrOpenedTriggerHandler
                     Object baseFilter = wf.getTriggerConfig().get("base").getValue();
                     if (baseFilter != null && payload.getPullRequest() != null && payload.getPullRequest().getBase() != null) {
                         if (!baseFilter.toString().equals(payload.getPullRequest().getBase().getRef())) {
+                            return false;
+                        }
+                    }
+
+                    Object toFilter = wf.getTriggerConfig().get("to").getValue();
+                    if (toFilter != null && payload.getPullRequest() != null && payload.getPullRequest().getHead() != null) {
+                        if (!toFilter.toString().equals(payload.getPullRequest().getHead().getRef())) {
                             return false;
                         }
                     }

@@ -135,6 +135,7 @@ public class ConditionEvaluator {
             }
             case ANY_MATCH -> evaluateAnyMatch(fieldValue, conditionValue);
             case ALL_MATCH -> evaluateAllMatch(fieldValue, conditionValue);
+            case NO_MATCH -> evaluateNoMatch(fieldValue,conditionValue);
         };
     }
 
@@ -283,6 +284,17 @@ public class ConditionEvaluator {
         }
         return actualList.stream().allMatch(expectedList::contains);
     }
+
+    private boolean evaluateNoMatch(Object fieldValue, Object conditionValue) {
+        if (!(conditionValue instanceof List<?> expectedList)) {
+            throw new IllegalArgumentException("ALL_MATCH operator requires list as conditionValue");
+        }
+        if (!(fieldValue instanceof List<?> actualList)) {
+            throw new IllegalArgumentException("ALL_MATCH operator requires list as fieldValue");
+        }
+        return actualList.stream().noneMatch(expectedList::contains);
+    }
+
 
     @SuppressWarnings("unchecked")
     private List<String> toList(Object value) {

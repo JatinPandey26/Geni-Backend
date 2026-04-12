@@ -1,8 +1,8 @@
 package com.geni.backend.trigger.impl.github.triggers;
 
 
-import com.geni.backend.Connector.impl.github.GithubWebhookEvent;
-import com.geni.backend.Connector.impl.github.GithubWebhookPayload;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookEvent;
+import com.geni.backend.Connector.impl.github.payload.GithubWebhookPayload;
 import com.geni.backend.trigger.core.TriggerType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
