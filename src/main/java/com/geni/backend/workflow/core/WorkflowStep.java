@@ -60,7 +60,7 @@ public class WorkflowStep {
      *
      * Immutable after creation (updatable = false).
      */
-    @Column(name = "client_id", updatable = false, nullable = false)
+    @Column(name = "client_id", updatable = false, nullable = false,unique = true)
     private UUID clientId;
 
     @ManyToOne(fetch = FetchType.LAZY)
