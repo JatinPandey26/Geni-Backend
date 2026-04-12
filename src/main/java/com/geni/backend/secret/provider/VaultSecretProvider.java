@@ -57,4 +57,17 @@ public class VaultSecretProvider implements SecretProvider{
 
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
     }
+
+    @Override
+    public void update(String key, Map<String, Object> value) {
+        Map<String, Object> existing = fetch(key);
+
+        if (existing == null) {
+            existing = value;
+        } else {
+            existing.putAll(value);
+        }
+
+        save(key, existing);
+    }
 }

@@ -4,6 +4,7 @@ import com.geni.backend.workflow.core.WorkflowDefinition;
 import com.geni.backend.workflow.core.WorkflowTriggerView;
 import com.geni.backend.workflow.enums.WorkflowStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,20 +17,16 @@ import java.util.UUID;
 
 @Repository
 public interface WorkflowDefinitionRepository
-        extends JpaRepository<WorkflowDefinition, UUID> {
+        extends JpaRepository<WorkflowDefinition, UUID> , JpaSpecificationExecutor<WorkflowDefinition> {
 
-    // Dashboard: all workflows for a user, newest first
     List<WorkflowDefinition> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    // Single workflow scoped to owner — prevents cross-user access
     Optional<WorkflowDefinition> findByIdAndUserId(UUID id, String userId);
 
-    // Poller: all active workflows waiting for a given trigger
     List<WorkflowDefinition> findByTriggerTypeAndStatus(
             String triggerType, WorkflowStatus status);
 
-    // Guard before deleting an integration:
-    // "does any active workflow still use this integration as its trigger?"
+
     @Query("""
         SELECT COUNT(w) > 0 FROM WorkflowDefinition w
         WHERE w.userId = :userId
@@ -47,6 +44,14 @@ public interface WorkflowDefinitionRepository
       w.triggerType as triggerType,
       w.triggerConfig as triggerConfig
     FROM WorkflowDefinition w
+    where triggerType = :triggerType
+    AND (:requiresIntegration = false OR w.triggerIntegrationId IS NOT NULL)  
     """)
-    List<WorkflowTriggerView> findByTriggerType(String triggerType);
+    List<WorkflowTriggerView> findByTriggerType(
+            @Param("triggerType") String triggerType,
+            @Param("requiresIntegration") boolean requiresIntegration);
+
+    @Query("UPDATE WorkflowDefinition w SET w.triggerIntegrationId = NULL WHERE w.triggerIntegrationId = :integrationId")
+    int clearIntegrationId(@Param("integrationId") Long integrationId);
+
 }

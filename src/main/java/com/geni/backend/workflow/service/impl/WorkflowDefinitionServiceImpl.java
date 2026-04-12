@@ -2,7 +2,7 @@ package com.geni.backend.workflow.service.impl;
 
 
 import com.geni.backend.common.exception.WorkflowValidationException;
-import com.geni.backend.workflow.core.ActionDefinitionRegistry;
+import com.geni.backend.workflow.core.ActionHandlerRegistry;
 import com.geni.backend.workflow.core.CreateWorkflowRequest;
 import com.geni.backend.workflow.core.RetryConfig;
 import com.geni.backend.workflow.core.RetryConfigResponse;
@@ -19,6 +19,7 @@ import com.geni.backend.workflow.validation.DagValidator;
 import com.geni.backend.workflow.validation.WorkflowReferenceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +29,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService {
 
     private final WorkflowDefinitionRepository repo;
     private final DagValidator dagValidator;
     private final WorkflowReferenceValidator workflowReferenceValidator;
-    private final ActionDefinitionRegistry actionRegistry;
+    private final ActionHandlerRegistry actionRegistry;
 
     // UserContext will be injected here once the user layer is added:
     // private final UserContext userContext;
@@ -95,6 +97,12 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
         repo.delete(findById(id));
     }
 
+    @Override
+    public void removeTriggerIntegrationId(long integrationId) {
+        int clearedWfs = repo.clearIntegrationId(integrationId);
+        log.info("Removed integration Id from WFs : {} " , clearedWfs );
+    }
+
     // ── Private: lookup ───────────────────────────────────────────────────────
 
     private WorkflowDefinition findById(UUID id) {
@@ -124,7 +132,7 @@ public class WorkflowDefinitionServiceImpl implements WorkflowDefinitionService 
     private WorkflowStep toStepEntity(CreateWorkflowRequest.StepRequest req) {
 
         var actionDef = actionRegistry.findOrThrow(req.getActionDefinitionId());
-        if (actionDef.isRequiresIntegration()
+        if (actionDef.definition().isRequiresIntegration()
                 && (req.getIntegrationId() == null)) {
             throw new WorkflowValidationException(
                     "Step '" + req.getName() + "' uses action '" + req.getActionDefinitionId()

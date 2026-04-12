@@ -1,5 +1,6 @@
 package com.geni.backend.workflow.core;
 
+import com.geni.backend.common.NodeConfig;
 import com.geni.backend.workflow.enums.OnErrorStrategy;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -8,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Value;
+import org.w3c.dom.Node;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.List;
@@ -48,7 +50,7 @@ public class CreateWorkflowRequest {
 
         // user-supplied values matching TriggerDefinition.configSchema
         // e.g. { "repo": "my-org/my-repo", "labelFilter": "bug" }
-        Map<String, Object> config;
+        Map<String, NodeConfig> config;
     }
 
     // ── Nested: StepRequest ───────────────────────────────────────────────────
@@ -103,7 +105,7 @@ public class CreateWorkflowRequest {
 
         // Keys = ActionDefinition.inputSchema field names
         // Values = template expressions: "{{trigger.email}}", "{{steps.<id>.output.text}}", or literals
-        Map<String, String> fieldMappings;
+        Map<String, Object> fieldMappings;
 
         @NotNull
         OnErrorStrategy onError;

@@ -1,8 +1,10 @@
 package com.geni.backend.common;
 
+import com.geni.backend.workflow.core.ConditionDefinition;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.List;
 import java.util.Map;
 
 // FieldSchema.java
@@ -10,23 +12,44 @@ import java.util.Map;
 @Value
 @Builder
 public class FieldSchema {
-    String type;         // "string", "number", "boolean", "object"
+    FieldType type; // "string", "number", "boolean", "object"
+    FieldType collectionType;
     boolean required;
     String description;
     Map<String, FieldSchema> properties;  // non-null when triggerType = "object"
+    List<ConditionDefinition.StructuredCondition.Operator> allowedOperators;
 
     public static FieldSchema string(String description) {
-        return FieldSchema.builder().type("string").required(true)
-                .description(description).build();
+        return FieldSchema.builder().type(FieldType.STRING).required(true)
+                .description(description).allowedOperators(List.of(ConditionDefinition.StructuredCondition.Operator.EQ)).build();
     }
 
     public static FieldSchema optionalString(String description) {
-        return FieldSchema.builder().type("string").required(false)
+        return FieldSchema.builder().type(FieldType.STRING).required(false)
+                .allowedOperators(List.of(ConditionDefinition.StructuredCondition.Operator.EQ))
                 .description(description).build();
     }
 
     public static FieldSchema bool(String description) {
-        return FieldSchema.builder().type("boolean").required(false)
+        return FieldSchema.builder().type(FieldType.BOOLEAN).required(false)
                 .description(description).build();
     }
+
+        public static FieldSchema number(String description) {
+            return FieldSchema.builder().type(FieldType.NUMBER).required(true)
+                    .description(description).build();
+        }
+
+    public static FieldSchema optionalNumber(String description) {
+        return FieldSchema.builder().type(FieldType.NUMBER).required(false)
+                .description(description).build();
+    }
+
+        public static FieldSchema object(Map<String, FieldSchema> properties, String description) {
+            return FieldSchema.builder().type(FieldType.OBJECT).required(false)
+                    .properties(properties)
+                    .description(description).build();
+        }
+
+
 }

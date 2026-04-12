@@ -18,4 +18,7 @@ public interface IntegrationService {
     public void deleteIntegration(Specification specification);
     public List<Integration> fetchIntegrations();
     public List<Integration> fetchIntegrations(ConnectorType connectorType);
+    public Integration fetchIntegration(Long id);
+    public Integration fetchByConnectorTypeAndExternalId(String connectorType , String externalId);
+    public Integration updateIntegration(Integration integration);
 }

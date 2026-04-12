@@ -39,7 +39,8 @@ public sealed interface ConditionDefinition
             GT, GTE, LT, LTE,
             CONTAINS, NOT_CONTAINS,
             IS_NULL, IS_NOT_NULL,
-            IN, NOT_IN
+            IN, NOT_IN,
+            ANY_MATCH, ALL_MATCH,NO_MATCH  // for array fields, e.g. "trigger.tags"
         }
     }
 

@@ -1,5 +1,7 @@
 package com.geni.backend.workflow.core;
 
+import com.geni.backend.common.FieldSchema;
+import com.geni.backend.common.NodeConfig;
 import com.geni.backend.workflow.enums.WorkflowStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -53,7 +55,7 @@ public class WorkflowDefinition {
      */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "trigger_config", columnDefinition = "jsonb")
-    private Map<String, Object> triggerConfig = new HashMap<>();
+    private Map<String, NodeConfig> triggerConfig = new HashMap<>();
 
     // ── Steps ──────────────────────────────────────────────────
     @OneToMany(
@@ -62,7 +64,6 @@ public class WorkflowDefinition {
             orphanRemoval = true,
             fetch       = FetchType.EAGER     // always needed together
     )
-    @OrderBy("stepOrder ASC")
     private List<WorkflowStep> steps = new ArrayList<>();
 
     // ── Audit ──────────────────────────────────────────────────

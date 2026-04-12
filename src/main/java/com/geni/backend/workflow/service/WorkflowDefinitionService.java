@@ -20,4 +20,6 @@ public interface WorkflowDefinitionService {
     WorkflowDefinitionResponse updateStatus(UUID id, WorkflowStatus status);
 
     void delete(UUID id);
+
+    void removeTriggerIntegrationId(long integrationId);
 }

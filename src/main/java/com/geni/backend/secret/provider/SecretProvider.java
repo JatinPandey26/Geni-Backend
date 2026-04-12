@@ -6,4 +6,5 @@ public interface SecretProvider {
     Map<String,Object> fetch(String key);
     void save(String key, Map<String,Object> value);
     void delete(String key);
+    void update(String key, Map<String,Object> value);
 }

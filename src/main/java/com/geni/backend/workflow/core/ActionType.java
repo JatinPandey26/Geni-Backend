@@ -1,0 +1,12 @@
+package com.geni.backend.workflow.core;
+
+public enum ActionType {
+    GMAIL_SEND_EMAIL,
+    GMAIL_CREATE_DRAFT,
+    GMAIL_DELETE_EMAIL,
+    GMAIL_SEARCH_EMAIL,
+    GMAIL_REPLY_EMAIL,
+    GITHUB_CREATE_ISSUE,
+    GITHUB_CREATE_PULL_REQUEST,
+    GITHUB_ISSUE_COMMENT_CREATE,
+}
