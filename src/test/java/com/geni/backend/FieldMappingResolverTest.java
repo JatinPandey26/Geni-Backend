@@ -82,14 +82,14 @@ class FieldMappingResolverTest {
 
     @Test
     void step_output_ref() {
-        String template = "{{steps." + STEP_A + ".output.summary}}";
+        String template = "{{steps." + STEP_A + ".summary}}";
         assertThat(resolver.resolveExpression(template, context))
                 .isEqualTo("Short summary of the issue");
     }
 
     @Test
     void step_output_in_mixed_string() {
-        String template = "From {{trigger.sender.login}}: {{steps." + STEP_A + ".output.summary}}";
+        String template = "From {{trigger.sender.login}}: {{steps." + STEP_A + ".summary}}";
         assertThat(resolver.resolveExpression(template, context))
                 .isEqualTo("From jatin: Short summary of the issue");
     }
@@ -113,7 +113,7 @@ class FieldMappingResolverTest {
         Map<String, Object> fieldMappings = Map.of(
                 "to",      "jatin@gmail.com",
                 "subject", "Bug: {{trigger.issue.title}}",
-                "body",    "Reported by {{trigger.sender.login}}\n{{steps." + STEP_A + ".output.summary}}"
+                "body",    "Reported by {{trigger.sender.login}}\n{{steps." + STEP_A + ".summary}}"
         );
 
         Map<String, Object> result = resolver.resolve(fieldMappings, context);
