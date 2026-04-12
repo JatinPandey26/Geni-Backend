@@ -58,8 +58,10 @@ public class GmailServiceImpl implements GmailService {
             for (GmailHistory gmailHistory : gmailHistoryResponse.getHistory()) {
                 if(gmailHistory.getMessagesAdded() != null) {
                     // process messagesAdded
+                    // TODO: we need a idempotency service for all events in case 1 message fails here it will result in refetching from prev history id again
+                    //  which will fetch some already processed messages .
+
                     for (GmailMessageAdded messageAdded : gmailHistory.getMessagesAdded()) {
-                        // For simplicity, we assume every webhook event corresponds to the same trigger type.
                         TriggerType triggerType = TriggerType.GMAIL_NEW_EMAIL;
 
                         TriggerHandler<?> handler = triggerHandlerRegistry.getByTriggerType(triggerType.name());
@@ -72,7 +74,8 @@ public class GmailServiceImpl implements GmailService {
                         Map<String, Object> messageRawResponse = connectorClient.getMessage(integration, messageAdded.getMessage().getId());
                         GmailRawMessage gmailRawMessage = objectMapper.convertValue(messageRawResponse, GmailRawMessage.class);
                         GmailMessagePayload gmailMessagePayload = GmailMessageMapper.map(gmailRawMessage);
-                        fetchAndEmbedAttachment(gmailMessagePayload,integration);
+//                        TODO: need to find a way to hold attachments and use in github
+//                        fetchAndEmbedAttachment(gmailMessagePayload,integration);
                         TriggerEvent<GmailMessagePayload> triggerEvent = TriggerEvent.<GmailMessagePayload>builder()
                                 .triggerType(triggerType)
                                 .payload(gmailMessagePayload)
@@ -84,12 +87,11 @@ public class GmailServiceImpl implements GmailService {
             }
         }
 
+        // updating history pointer
         integration.getMetadata().put("historyId",gmailHistoryResponse.getHistoryId());
         integrationService.updateIntegration(integration);
 
     }
-
-
 
     private GmailHistoryResponse fetchGmailEventsFromHistory(Integration integration, GmailPushData pushData) {
         if (pushData == null || pushData.getEmailAddress() == null) {

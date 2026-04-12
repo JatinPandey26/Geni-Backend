@@ -132,7 +132,7 @@ public class GithubWebhookPayload implements TriggerPayload {
         private String body;
 
         @JsonProperty("html_url")
-        private String htmlUrl;
+        private String html_url;
 
         @JsonProperty("state")
         private String state;

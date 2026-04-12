@@ -44,7 +44,7 @@ public interface WorkflowDefinitionRepository
       w.triggerType as triggerType,
       w.triggerConfig as triggerConfig
     FROM WorkflowDefinition w
-    where triggerType = :triggerType
+    where w.status = 'ACTIVE' and triggerType = :triggerType
     AND (:requiresIntegration = false OR w.triggerIntegrationId IS NOT NULL)  
     """)
     List<WorkflowTriggerView> findByTriggerType(
